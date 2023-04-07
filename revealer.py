@@ -20,17 +20,20 @@ pdir = os.path.dirname(pfile)+'/'
 rdir = pdir + 'reveal.js/'
 if not os.path.isdir(rdir):
 
-  # Copy folder
-  shutil.copytree(os.getcwd()+'/reveal.js', rdir)
+  pydir = os.path.dirname(__file__)+'/'
 
-# Add custom themes
-themes = os.listdir(os.getcwd()+'/theme')
-for theme in themes:
-  shutil.copyfile(os.getcwd()+'/theme/'+theme, rdir+'dist/theme/'+theme)
+  # Copy folder
+  shutil.copytree(pydir + 'reveal.js', rdir)
+
+  # Add custom themes
+  themes = os.listdir(pydir + 'theme')
+  for theme in themes:
+    shutil.copyfile(pydir + 'theme/' + theme, rdir + 'dist/theme/' + theme)
 
 # === Parsing ==============================================================
 
 setting = {}
+
 slide = []
 
 with open(pfile, "r") as fid:
@@ -79,7 +82,7 @@ with open(pfile, "r") as fid:
 
     # --- Slide content
 
-    if len(slide):
+    if len(slide) and not line.startswith('>'):
       slide[-1]['html'] += line
 
 # === Output ===============================================================
@@ -127,7 +130,13 @@ for k, S in enumerate(slide):
   
   match S['type']:
 
-    case 'first' | 'section':
+    case 'first':
+      content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+      content += '<h1>' + S['title']+ '</h1>'
+      if 'subtitle' in setting:
+        content += '<h3>' + setting['subtitle'] + '</h3>'
+        
+    case 'section':
       content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
       content += '<h1>' + S['title']+ '</h1>'
 
@@ -152,4 +161,4 @@ ofile = pdir + os.path.splitext(os.path.basename(pfile))[0] + '.html'
 with open(ofile, "w") as fid:
   fid.write(out)
 
-print(slide)
+print(setting)
