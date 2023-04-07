@@ -27,4 +27,4 @@ In the extension settings add:
 
 Install the `Live Server` VScode extension.
 
-Open the `*presentation*.html` file and click `Go Live` to display the live view. You can then close the `*presentation*.html` file.
+Open your `presentation.html` file and click `Go Live` to display the live view. You can then close the presentation file.
