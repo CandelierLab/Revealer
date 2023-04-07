@@ -4,20 +4,27 @@
 
 ## Setting the environment
 
-### Autosamatic revealing with VS code
+### Automatic revealing with VS code
 
-Install the "Run on save" VScode extension.
+Install the `Run on save` VScode extension.
+
 In the extension settings add: 
 ```
 "emeraldwalk.runonsave": {
-      "commands": [
-        {
-          "match": "\\.pres$",
-          "cmd": "python3 /your/custom/path/Revealer/revealer.py"
-        }
-      ]
-    },
-    "files.associations": {
-      "*.pres": "html"
-    },
+  "commands": [
+    {
+      "match": "\\.pres$",
+      "cmd": "python3 /your/custom/path/Revealer/revealer.py"
+    }
+  ]
+},
+"files.associations": {
+  "*.pres": "html"
+},
 ```
+
+### Live view
+
+Install the `Live Server` VScode extension.
+
+Open the `*presentation*.html` file and click `Go Live` to display the live view. You can then close the `*presentation*.html` file.
