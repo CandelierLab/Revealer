@@ -14,7 +14,7 @@ In the extension settings add:
   "commands": [
     {
       "match": "\\.pres$",
-      "cmd": "python3 /your/custom/path/Revealer/revealer.py"
+      "cmd": "python3 /your/custom/path/Revealer/revealer.py '{$file}'"
     }
   ]
 },
