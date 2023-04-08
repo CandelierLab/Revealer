@@ -33,7 +33,6 @@ if not os.path.isdir(rdir):
 # === Parsing ==============================================================
 
 setting = {}
-
 slide = []
 
 with open(pfile, "r") as fid:
@@ -131,10 +130,46 @@ for k, S in enumerate(slide):
   match S['type']:
 
     case 'first':
-      content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+
+      # Logos
+      if 'logo' in setting:
+
+        logos = ''
+        if isinstance(setting['logo'], list): 
+          for i, logo in enumerate(setting['logo']):
+            if i: logos += ', '
+            logos += "url('" + logo + "')"
+        else:
+          logos += "url('" + setting['logo'] + "')"
+
+        content += '<style>.slide_{:d} header::after {{ content:""; background-image:{:s}; display: block; height:50px; background-size: contain; background-repeat: no-repeat; background-padding: 0, 100px, 200px; }}</style>'.format(k, logos)  
+
+      else:
+        content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+
+
+      # Title
       content += '<h1>' + S['title']+ '</h1>'
+
+      # Subtitle
       if 'subtitle' in setting:
-        content += '<h3>' + setting['subtitle'] + '</h3>'
+        content += '<h2>' + setting['subtitle'] + '</h2>'
+
+      content += '<br>'
+
+      # Authors
+      if 'author' in setting:
+
+        if isinstance(setting['author'], list): 
+          for i, a in enumerate(setting['author']):
+            if i: content += ', '
+            content += a
+        else:
+          content += setting['author']
+
+      # Date
+      if 'date' in setting:
+        content += '<div id="first_date">' + setting['date'] + '</div>'
         
     case 'section':
       content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
@@ -160,5 +195,3 @@ out = out[0:i] + content + out[i:]
 ofile = pdir + os.path.splitext(os.path.basename(pfile))[0] + '.html'
 with open(ofile, "w") as fid:
   fid.write(out)
-
-print(setting)

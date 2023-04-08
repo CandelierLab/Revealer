@@ -378,3 +378,20 @@ header {
   font-weight: var(--r-heading-font-weight);
   word-wrap: break-word;
 }
+
+header img {
+  height: 50px;
+}
+
+.reveal h1 {
+  color: #1B262C;
+}
+
+.reveal h2 {
+  color: #0F4C75;
+}
+
+#first_date {
+  margin: 20px 0 0 0; 
+  color: grey;
+}
