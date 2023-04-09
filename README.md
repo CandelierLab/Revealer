@@ -83,10 +83,10 @@ Revealer accept html in the pres file. However, several shortcuts and commands h
 | Command | Description |
 | --- | --- |
 | `#` | **Comment**. Any line sarting with a `#` is considered as a comment and skipped.  |
-| `>>> first:` *Title* | **First slide**. The content of this slide is automatically generated. |
-| `===` *Title* | **Horizontal slide**. |
-| `---` *Title* | **Vertical slide**. |
-| `%%%` *Section* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. |
+| `>>> first:` *title* | **First slide**. The content of this slide is automatically generated. |
+| `===` *title* | **Horizontal slide**. |
+| `---` *title* | **Vertical slide**. |
+| `%%%` *section title* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. |
 | `>>> biblio` | **Bibliography slide** |
 
 #### Presentation settings
@@ -95,10 +95,10 @@ These settings have tobe defined before any slide is defined.
 
 | Command | Description |
 | --- | --- |
-| `> author:` *Author Name*| **Author name**. Use multiple times to add other contributors. |
-| `> event:` *Event name* | **Event name**. |
-| `> logo:` *File path* | **Institutional logo **. Path to a logo to display on the first page. Can be used multiple times for several logos. |
-| `> theme:` *Theme name* | **Theme**. Any reveal.js theme, or `'ljp'` (default). |
+| `> author:` *author Name*| **Author name**. Use multiple times to add other contributors. |
+| `> event:` *event name* | **Event name**. Typically the location and date. |
+| `> logo:` *path* | **Institutional logo**. Path to a logo to display on the first page. Can be used multiple times for several logos. |
+| `> theme:` *theme name* | **Theme**. Any reveal.js theme, or `'ljp'` (default). |
 | `> slideNumber:` *option* | **Slide numbers**. Disabled by default, manages how slides are numbered and displayed. Use any [value allowed by reveal.js](https://revealjs.com/slide-numbers/). |
 
 
@@ -106,7 +106,7 @@ These settings have tobe defined before any slide is defined.
 
 | Command | Description |
 | --- | --- |
-| `> subtitle:` *Subtitle* | **Subtitle**. First slide subtitle. Has no effect outside of the first slide. |
+| `> subtitle:` *subtitle* | **Subtitle**. First slide subtitle. Has no effect outside of the first slide. |
 | `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
-| `> background: ` *Path* | **Background image**. Defines a background image for the current slide. |
-| `> color: ` *Color* | **Text color**. Defines the current slide text color. |
+| `> background: ` *path* | **Background image**. Defines a background image for the current slide. |
+| `> color: ` *color* | **Text color**. Defines the current slide text color. |
