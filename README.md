@@ -106,6 +106,7 @@ These settings have tobe defined before any slide is defined.
 | `> event:` *event name* | **Event name**. Typically the location and date. |
 | `> logo:` *path* | **Institutional logo**. Path to a logo to display on the first page. Can be used multiple times for several logos. |
 | `> theme:` *theme name* | **Theme**. Any [reveal.js theme](https://revealjs.com/themes/), or `'ljp'` (default). |
+| `> codeTheme:` *code theme* | **Code theme**. A full list of available themes can be found [here](https://highlightjs.org/static/demo/). Default: `zenburn`. |
 | `> slideNumber:` *option* | **Slide numbers**. Disabled by default, manages how slides are numbered and displayed. Use any [value allowed by reveal.js](https://revealjs.com/slide-numbers/). |
 
 

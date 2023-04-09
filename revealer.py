@@ -112,6 +112,7 @@ with open(pfile, "r") as fid:
 # --- Default settings
 
 if 'theme' not in setting: setting['theme'] = 'ljp'
+if 'codeTheme' not in setting: setting['codeTheme'] = 'zenburn'
 
 # --- Import template index.html
 
@@ -131,7 +132,7 @@ for old, new in rList:
 # --- Settings
 
 rList = [
-  ('monokai.css', 'zenburn.css'),
+  ('monokai.css', setting['codeTheme'] + '.css'),
   ('theme/black.css', 'theme/{:s}.css'.format(setting['theme'])),
 ]
 
