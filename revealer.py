@@ -72,8 +72,12 @@ with open(pfile, "r") as fid:
 
     s = '--- '
     if line.startswith(s):
-      slide[-1]['type'] = 'parent'
-      slide.append({'type': 'children', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
+      match slide[-1]['type']:
+        case 'lastchild':
+          slide[-1]['type'] = 'child'
+        case _:
+          slide[-1]['type'] = 'parent'
+      slide.append({'type': 'lastchild', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
       continue
 
     # --- Settings
@@ -230,7 +234,7 @@ for k, S in enumerate(slide):
 
   # --- Section tags
 
-  if S['type'] == 'children':
+  if S['type'] == 'lastchild':
      content += '</section>'
 
 # --- Injects into html
@@ -249,4 +253,5 @@ ofile = pdir + os.path.splitext(os.path.basename(pfile))[0] + '.html'
 with open(ofile, "w") as fid:
   fid.write(out)
 
-print(slide[3])
+for S in slide:
+  print(S)
