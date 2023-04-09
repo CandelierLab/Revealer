@@ -155,11 +155,11 @@ for k, S in enumerate(slide):
     opt += ' data-background-image="{:s}"'.format(S['param']['background'])
 
   # Other parameters
-  if 'section' in S['param']:
-    if isinstance(S['param']['section'], list):
+  if 'attr' in S['param']:
+    if isinstance(S['param']['attr'], list):
       pass
     else:
-      opt += ' ' + S['param']['section']
+      opt += ' ' + S['param']['attr']
 
   content += '<section {:s}>'.format(opt)
 
