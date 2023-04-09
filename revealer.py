@@ -138,12 +138,35 @@ headers = '<header></header>'
 content = ''
 
 for k, S in enumerate(slide):
-   
+
+  # --- Section tags -------------------------------------------------------
+
+  # Parenting section
   if S['type'] == 'parent':
     content += '<section data-transition="none">'
      
-  content += '<section data-transition="none" data-state="slide_{:d}">'.format(k)
+  # Base options
+  opt =  'data-transition="none" data-state="slide_{:d}"'.format(k)
+
+  # --- Section parameters
+
+  # Background
+  if 'background' in S['param']:
+    opt += ' data-background-image="{:s}"'.format(S['param']['background'])
+
+  # Color
+
+  # Other parameters
+  if 'section' in S['param']:
+    if isinstance(S['param']['section'], list):
+      pass
+    else:
+      opt += ' ' + S['param']['section']
+
+  content += '<section {:s}>'.format(opt)
   
+  # --- Slide specialization -----------------------------------------------
+
   match S['type']:
 
     case 'first':
@@ -201,6 +224,8 @@ for k, S in enumerate(slide):
   content += S['html']
   content += '</section>'
 
+  # --- Section tags
+
   if S['type'] == 'children':
      content += '</section>'
 
@@ -220,4 +245,4 @@ ofile = pdir + os.path.splitext(os.path.basename(pfile))[0] + '.html'
 with open(ofile, "w") as fid:
   fid.write(out)
 
-print(slide[1])
+print(slide[3])
