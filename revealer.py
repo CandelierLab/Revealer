@@ -167,8 +167,8 @@ for k, S in enumerate(slide):
       content += '<h1><br>' + S['title']+ '</h1>'
 
       # Subtitle
-      if 'subtitle' in setting:
-        content += '<h2>' + setting['subtitle'] + '</h2>'
+      if 'subtitle' in S['param']:
+        content += '<h2>' + S['param']['subtitle'] + '</h2>'
 
       content += '<br>'
 
