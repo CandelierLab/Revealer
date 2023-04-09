@@ -42,7 +42,7 @@ Now, every time you save a `.pres` file in VScode the following actions are trig
 
 Install the `Live Server` VScode extension.
 
-Open your `presentation.html` file and click `Go Live` to display the live view. You can then close the presentation file.
+Open your `.html` file and click `Go Live` to display the live view in your browser. This view will be updated every time you save a modification to the `.pres` file. You can then close the html file in VScode.
 
 ## Using Revealer
 
@@ -67,6 +67,8 @@ A `.pres` file is typically composed of two parts: Settings and Content. The Set
 Then the content part contains the slides:
 
 ```
+# --- CONTENT---------------------------------------------------------------
+
 >>> first: Title
 > subtitle: Subtitle
 
@@ -81,7 +83,7 @@ This slide is <b>extremely</b> informative.
 
 ### Command syntax
 
-Revealer accept html in the pres file. However, several shortcuts and commands have been added to fasten up the writing process and focus on the content.
+Revealer accept html in the pres file, just like in standard reveal.js presentations. However, several shortcuts and commands have been added to fasten up the writing process and focus on the content.
 
 #### Main commands
 
@@ -103,7 +105,7 @@ These settings have tobe defined before any slide is defined.
 | `> author:` *author Name*| **Author name**. Use multiple times to add other contributors. |
 | `> event:` *event name* | **Event name**. Typically the location and date. |
 | `> logo:` *path* | **Institutional logo**. Path to a logo to display on the first page. Can be used multiple times for several logos. |
-| `> theme:` *theme name* | **Theme**. Any reveal.js theme, or `'ljp'` (default). |
+| `> theme:` *theme name* | **Theme**. Any [reveal.js theme](https://revealjs.com/themes/), or `'ljp'` (default). |
 | `> slideNumber:` *option* | **Slide numbers**. Disabled by default, manages how slides are numbered and displayed. Use any [value allowed by reveal.js](https://revealjs.com/slide-numbers/). |
 
 
