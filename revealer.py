@@ -18,6 +18,10 @@ pdir = os.path.dirname(pfile)+'/'
 
 # Check existence
 rdir = pdir + 'reveal.js/'
+
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
+
 if not os.path.isdir(rdir):
 
   pydir = os.path.dirname(__file__)+'/'
@@ -38,25 +42,30 @@ slide = []
 with open(pfile, "r") as fid:
   for line in fid:
 
+    # --- Comments
+
+    if line.startswith('#'):
+      continue
+
     # --- First slide
 
     s = '>>> first: '
     if line.startswith(s):
-      slide.append({'type': 'first', 'title': line[len(s):].strip(), 'html': ''})
+      slide.append({'type': 'first', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
       continue
 
     # --- Section slides
 
     s = r'%%% '
     if line.startswith(s):
-      slide.append({'type': 'section', 'title': line[len(s):].strip(), 'html': ''})
+      slide.append({'type': 'section', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
       continue
 
     # --- Regular slide
 
     s = '=== '
     if line.startswith(s):
-      slide.append({'type': 'slide', 'title': line[len(s):].strip(), 'html': ''})
+      slide.append({'type': 'slide', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
       continue
 
     # --- Children slides
@@ -64,20 +73,30 @@ with open(pfile, "r") as fid:
     s = '--- '
     if line.startswith(s):
       slide[-1]['type'] = 'parent'
-      slide.append({'type': 'children', 'title': line[len(s):].strip(), 'html': ''})
+      slide.append({'type': 'children', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
       continue
 
     # --- Settings
     
     if line.startswith('>'):
+
       x = re.search('^> ([^:]*): (.*)', line)
       if x:
-        if x.group(1) in setting:
-          if not isinstance(setting[x.group(1)], list):
-            setting[x.group(1)] = [setting[x.group(1)]]
-          setting[x.group(1)].append(x.group(2))
+
+        if len(slide):
+
+          # Slide settings
+          slide[-1]['param'][x.group(1)] = x.group(2)
+
         else:
-          setting[x.group(1)] = x.group(2)
+
+          # Global settings
+          if x.group(1) in setting:
+            if not isinstance(setting[x.group(1)], list):
+              setting[x.group(1)] = [setting[x.group(1)]]
+            setting[x.group(1)].append(x.group(2))
+          else:
+            setting[x.group(1)] = x.group(2)
 
     # --- Slide content
 
@@ -111,15 +130,13 @@ rList = [
 for old, new in rList:
     out = out.replace(old, new)
 
-# --- Styling
-
-out = out.replace('<body>', '<body><header></header>')
-
 # --- Content --------------------------------------------------------------
 
 # --- Build content
 
+headers = '<header></header>'
 content = ''
+
 for k, S in enumerate(slide):
    
   if S['type'] == 'parent':
@@ -131,25 +148,23 @@ for k, S in enumerate(slide):
 
     case 'first':
 
+      # Remove header
+      content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+      
       # Logos
       if 'logo' in setting:
 
-        logos = ''
-        if isinstance(setting['logo'], list): 
-          for i, logo in enumerate(setting['logo']):
-            if i: logos += ', '
-            logos += "url('" + logo + "')"
-        else:
-          logos += "url('" + setting['logo'] + "')"
+        # Build logo header
+        headers += '<div id="hlogos">'
+        for logo in setting['logo']:
+          headers += '<img src="{:s}">'.format(logo)
+        headers += '</div>'
 
-        content += '<style>.slide_{:d} header::after {{ content:""; background-image:{:s}; display: block; height:50px; background-size: contain; background-repeat: no-repeat; background-padding: 0, 100px, 200px; }}</style>'.format(k, logos)  
-
-      else:
-        content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
-
-
+        # Display header        
+        content += '<style>.slide_{:d} #hlogos {{ display: flex; }}</style>'.format(k)
+        
       # Title
-      content += '<h1>' + S['title']+ '</h1>'
+      content += '<h1><br>' + S['title']+ '</h1>'
 
       # Subtitle
       if 'subtitle' in setting:
@@ -167,15 +182,20 @@ for k, S in enumerate(slide):
         else:
           content += setting['author']
 
-      # Date
-      if 'date' in setting:
-        content += '<div id="first_date">' + setting['date'] + '</div>'
+      # Event (place, date)
+      if 'event' in setting:
+        content += '<div id="event">' + setting['event'] + '</div>'
         
     case 'section':
+
+      # Remove header
       content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+
+      # Title
       content += '<h1>' + S['title']+ '</h1>'
 
     case _:
+
       content += '<style>.slide_{:d} header::after {{ content: "{:s}"; }}</style>'.format(k, S['title'])  
 
   content += S['html']
@@ -186,6 +206,10 @@ for k, S in enumerate(slide):
 
 # --- Injects into html
 
+# Headers
+out = out.replace('<body>', '<body>' + headers)
+
+
 s = '<div class="slides">\n'
 i = out.find(s) + len(s)
 out = out[0:i] + content + out[i:]
@@ -195,3 +219,5 @@ out = out[0:i] + content + out[i:]
 ofile = pdir + os.path.splitext(os.path.basename(pfile))[0] + '.html'
 with open(ofile, "w") as fid:
   fid.write(out)
+
+print(slide[1])
