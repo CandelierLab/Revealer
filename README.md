@@ -14,7 +14,7 @@ Installation is as simple as:
 
 Then, Revealer can be used on any file with the `.pres` extension, located anywhere in your fileystem.
 
-### Automatic revealing with VS code
+### Automatic revealing with VScode
 
 Install the `Run on save` VScode extension.
 
