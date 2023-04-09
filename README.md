@@ -8,7 +8,7 @@ In a mindset close to LaTeX, presentations are defined by a single text file con
 
 Installation is as simple as:
 * Clone Revealer in a `Revealer` folder somewhere on your filesystem.
-* Add the latest version of reveal.js in a `reveal.js` folder inside the `Revealer` folder. Do not hesitate to supercharge it with plugins, like the chalkboard for instance.
+* Add the latest version of reveal.js in a `reveal.js` folder inside the `Revealer` folder. Do not hesitate to supercharge it with plugins, like the chalkboard or Math support.
 * Configure VScode as described below.
 * Optionnal: reveal your first presentation out of Demo.pres file.
 
@@ -74,12 +74,39 @@ This slide is <i>very</i> informative
 This slide is <b>extremely</b> informative.
 ```
 
-### Syntax
+### Command syntax
+
+Revealer accept html in the pres file. However, several shortcuts and commands have been added to fasten up the writing process and focus on the content.
+
+#### Main commands
 
 | Command | Description |
 | --- | --- |
 | `#` | **Comment**. Any line sarting with a `#` is considered as a comment and skipped.  |
-| `>>> first:` *Title* | **First slide**. |
+| `>>> first:` *Title* | **First slide**. The content of this slide is automatically generated. |
 | `===` *Title* | **Horizontal slide**. |
 | `---` *Title* | **Vertical slide**. |
+| `%%%` *Section* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. |
 | `>>> biblio` | **Bibliography slide** |
+
+#### Presentation settings
+
+These settings have tobe defined before any slide is defined.
+
+| Command | Description |
+| --- | --- |
+| `> author:` *Author Name*| **Author name**. Use multiple times to add other contributors. |
+| `> event:` *Event name* | **Event name**. |
+| `> logo:` *File path* | **Institutional logo **. Path to a logo to display on the first page. Can be used multiple times for several logos. |
+| `> theme:` *Theme name* | **Theme**. Any reveal.js theme, or `'ljp'` (default). |
+| `> slideNumber:` *option* | **Slide numbers**. Disabled by default, manages how slides are numbered and displayed. Use any [value allowed by reveal.js](https://revealjs.com/slide-numbers/). |
+
+
+#### Slide settings
+
+| Command | Description |
+| --- | --- |
+| `> subtitle:` *Subtitle* | **Subtitle**. First slide subtitle. Has no effect outside of the first slide. |
+| `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
+| `> background: ` *Path* | **Background image**. Defines a background image for the current slide. |
+| `> color: ` *Color* | **Text color**. Defines the current slide text color. |
