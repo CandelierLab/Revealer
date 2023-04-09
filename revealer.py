@@ -154,8 +154,6 @@ for k, S in enumerate(slide):
   if 'background' in S['param']:
     opt += ' data-background-image="{:s}"'.format(S['param']['background'])
 
-  # Color
-
   # Other parameters
   if 'section' in S['param']:
     if isinstance(S['param']['section'], list):
@@ -164,6 +162,12 @@ for k, S in enumerate(slide):
       opt += ' ' + S['param']['section']
 
   content += '<section {:s}>'.format(opt)
+
+  # --- Slide styling ------------------------------------------------------
+
+   # Color
+  if 'color' in S['param']:
+    content += '<style>.slide_{:d} section, .slide_{:d} h1, .slide_{:d} h2, .slide_{:d} h3, .slide_{:d} p {{ color: {:s}; }}</style>'.format(k,k,k,k,k, S['param']['color'])
   
   # --- Slide specialization -----------------------------------------------
 
