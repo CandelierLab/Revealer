@@ -180,7 +180,7 @@ for k, S in enumerate(slide):
     case 'first':
 
       # Remove header
-      content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+      S['param']['header'] = 'none'
       
       # Logos
       if 'logo' in setting:
@@ -220,7 +220,7 @@ for k, S in enumerate(slide):
     case 'section':
 
       # Remove header
-      content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
+      S['param']['header'] = 'none'
 
       # Title
       content += '<h1>' + S['title']+ '</h1>'
@@ -228,6 +228,10 @@ for k, S in enumerate(slide):
     case _:
 
       content += '<style>.slide_{:d} header::after {{ content: "{:s}"; }}</style>'.format(k, S['title'])  
+
+  # Remove header
+  if 'header' in S['param'] and S['param']['header'] == 'none':
+    content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
 
   content += S['html']
   content += '</section>'
