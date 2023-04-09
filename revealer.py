@@ -109,6 +109,10 @@ with open(pfile, "r") as fid:
 
 # === Output ===============================================================
 
+# --- Default settings
+
+if 'theme' not in setting: setting['theme'] = 'ljp'
+
 # --- Import template index.html
 
 tfile = open(rdir + 'index.html', "r")
@@ -130,6 +134,9 @@ rList = [
   ('monokai.css', 'zenburn.css'),
   ('theme/black.css', 'theme/{:s}.css'.format(setting['theme'])),
 ]
+
+if 'slideNumber' in setting:
+  rList.append(('slideNumber: false,', "slideNumber: '{:s}',".format(setting['slideNumber'])))
 
 for old, new in rList:
     out = out.replace(old, new)
@@ -257,5 +264,6 @@ ofile = pdir + os.path.splitext(os.path.basename(pfile))[0] + '.html'
 with open(ofile, "w") as fid:
   fid.write(out)
 
-for S in slide:
-  print(S)
+# for S in slide:
+#   print(S)
+print(setting)
