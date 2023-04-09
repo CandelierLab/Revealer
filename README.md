@@ -33,6 +33,11 @@ In the extension settings add:
 },
 ```
 
+Now, every time you save a `.pres` file in VScode the following actions are triggered:
+
+* Copy the reveal.js folder in the folder of the `.pres` file, if it is not already present.
+* Generate a `.html` file with the same name as the presentation file. This is your presentation, ready to be opened in any web browser.
+
 ### Live view
 
 Install the `Live Server` VScode extension.
