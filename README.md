@@ -159,3 +159,5 @@ Bullet lists can be defined in any slide with the following syntax:
 * Second Item
 * Third item
 ```
+
+The space after the `*` is mandatory.
