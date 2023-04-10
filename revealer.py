@@ -168,7 +168,10 @@ for k, S in enumerate(slide):
 
   # Background
   if 'background' in S['param']:
-    opt += ' data-background-image="{:s}"'.format(S['param']['background'])
+    if S['param']['background'].find('.')==-1:
+      opt += ' data-background-color="{:s}"'.format(S['param']['background'])
+    else:
+      opt += ' data-background-image="{:s}"'.format(S['param']['background'])
 
   # Other parameters
   if 'attr' in S['param']:
@@ -203,7 +206,7 @@ for k, S in enumerate(slide):
           headers += '<img src="{:s}">'.format(logo)
         headers += '</div>'
 
-        # Display header        
+        # Display logo header        
         content += '<style>.slide_{:d} #hlogos {{ display: flex; }}</style>'.format(k)
         
       # Title
@@ -253,7 +256,12 @@ for k, S in enumerate(slide):
   if S['type'] == 'lastchild':
      content += '</section>'
 
-# --- Injects into html
+# --- Content modifications -------------------------------------------------
+
+# --- Bulleted lists
+
+
+# --- Inject into html -----------------------------------------------------
 
 # Headers
 out = out.replace('<body>', '<body>' + headers)
