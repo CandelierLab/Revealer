@@ -162,6 +162,10 @@ for k, S in enumerate(slide):
 
   # --- Section parameters
 
+  # Visibility
+  if 'visibility' in S['param'] and S['param']['visibility']=='hidden':
+    opt += ' data-visibility="hidden"'
+
   # Background
   if 'background' in S['param']:
     opt += ' data-background-image="{:s}"'.format(S['param']['background'])

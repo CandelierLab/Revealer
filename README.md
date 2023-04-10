@@ -10,7 +10,7 @@ Installation is as simple as:
 * Clone Revealer in a `Revealer` folder somewhere on your filesystem.
 * Add the latest version of reveal.js in a `reveal.js` folder inside the `Revealer` folder. Do not hesitate to supercharge it with plugins, like the chalkboard or Math support.
 * Configure VScode as described below.
-* Optionnal: reveal your first presentation out of Demo.pres file.
+* Optionnal: reveal your first presentation out of the `Demo.pres` file.
 
 Then, Revealer can be used on any file with the `.pres` extension, located anywhere in your fileystem.
 
@@ -43,6 +43,12 @@ Now, every time you save a `.pres` file in VScode the following actions are trig
 Install the `Live Server` VScode extension.
 
 Open your `.html` file and click `Go Live` to display the live view in your browser. This view will be updated every time you save a modification to the `.pres` file. You can then close the html file in VScode.
+
+### Additional plugins
+
+You may also want to add these additional VScode plugins for convenience:
+
+* [BibManager](https://github.com/twday/vscode-bibmanager), for managing `bibtex` files.
 
 ## Using Revealer
 
@@ -83,7 +89,7 @@ This slide is <b>extremely</b> informative.
 
 ### Command syntax
 
-Revealer accept html in the pres file, just like in standard reveal.js presentations. However, several shortcuts and commands have been added to fasten up the writing process and focus on the content.
+Revealer accepts html in the pres file, just like in standard reveal.js presentations. However, several shortcuts and commands have been added to fasten up the writing process and focus on the content.
 
 #### Main commands
 
@@ -94,7 +100,7 @@ Revealer accept html in the pres file, just like in standard reveal.js presentat
 | `===` *title* | **Horizontal slide**. |
 | `---` *title* | **Vertical slide**. |
 | `%%%` *section title* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. |
-| `>>> biblio` | **Bibliography slide** |
+| `>>> biblio` | **Bibliography slide(s)**. Automatically add slides with a formated bibliography based on the references defined by the `> cite:` command. |
 
 #### Presentation settings
 
@@ -108,22 +114,25 @@ These settings have tobe defined before any slide is defined.
 | `> theme:` *theme name* | **Theme**. Any [reveal.js theme](https://revealjs.com/themes/), or `'revealer'` (default). |
 | `> codeTheme:` *code theme* | **Code theme**. A full list of available themes can be found [here](https://highlightjs.org/static/demo/). Default: `zenburn`. |
 | `> slideNumber:` *option* | **Slide numbers**. Disabled by default, manages how slides are numbered and displayed. Use any [value allowed by reveal.js](https://revealjs.com/slide-numbers/). |
+| `> bibtex:` *path* | **Bibtex file**. Path of the bibtex file used for bibliography. |
 
-
-#### Slide settings
+#### Slide commands
 
 | Command | Description |
 | --- | --- |
+| `> visibility: hidden` | **Hide slide**. |
 | `> subtitle:` *subtitle* | **Subtitle**. First slide subtitle. Has no effect outside of the first slide. |
 | `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
 | `> background: ` *path* | **Background image**. Defines a background image for the current slide. |
 | `> color: ` *color* | **Text color**. Defines the current slide text color. |
+| `> cite: ` *refID* | **Citation**. Cites the reference (defined by *refID* in the associated `bibtex` file) in the current slide. A short description is automatically inserted at the bottom of the slide and a superscript marker can be added anywhere in the slide with `<refID>`. The complete description of the reference is added in the bibliography slide. The maximal number of short descriptions is 4 by slide; if more citations are made, they are added to the bilbiography and can be refered to with a superscript tag, but the short descriptions are skipped. |
+| `> Notes:` | **Notes**. Everything after this command will be displayed in the speaker's view notes only. |
 
 ### Other syntax tools
 
 #### Columns
 
-Specific tags are defined in the `revealer.css` style sheet (`revealer` theme) to define layouts with multiple columns:
+Specific html tags are defined in the `revealer.css` style sheet (`revealer` theme) to define layouts with multiple columns:
 
 ```
 This is a full width header.
@@ -139,3 +148,13 @@ This is a full width header.
 ```
 
 It works with any number of columns.
+
+#### Bullet lists
+
+Bullet lists can be defined in any slide with the following syntax:
+
+```
+* First Item 
+* Second Item
+* Third item
+```
