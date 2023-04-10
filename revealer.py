@@ -29,6 +29,10 @@ if not os.path.isdir(rdir):
   # Copy folder
   shutil.copytree(pydir + 'reveal.js', rdir)
 
+  # Add javascript
+  shutil.copyfile(pydir + 'js/revealer.js', rdir + 'js/revealer.js')
+  shutil.copyfile(pydir + 'js/jquery.min.js', rdir + 'js/jquery.min.js')  
+
   # Add custom themes
   themes = os.listdir(pydir + 'theme')
   for theme in themes:
@@ -142,6 +146,11 @@ if 'slideNumber' in setting:
 for old, new in rList:
     out = out.replace(old, new)
 
+# --- Javascript
+
+out = out.replace('</body>', '<script src="reveal.js/js/jquery.min.js"></script>\n<script src="reveal.js/js/revealer.js"></script>\n</body>')
+
+
 # --- Content --------------------------------------------------------------
 
 # --- Build content
@@ -242,7 +251,7 @@ for k, S in enumerate(slide):
 
     case _:
 
-      content += '<style>.slide_{:d} header::after {{ content: "{:s}"; }}</style>'.format(k, S['title'])  
+      content += '<div class="slide_header">{:s}</div>'.format(S['title'])
 
   # Remove header
   if 'header' in S['param'] and S['param']['header'] == 'none':
@@ -279,4 +288,4 @@ with open(ofile, "w") as fid:
 
 # for S in slide:
 #   print(S)
-print(setting)
+# print(setting)
