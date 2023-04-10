@@ -261,15 +261,11 @@ for k, S in enumerate(slide):
 
   html = S['html'].strip()
 
-  # --- Line return
+  # Line return
+  html = re.sub('\n(?!\*)', '<br>', html)
 
-  if k==2:
-
-    a = re.sub('\n( +)?\n+', '<br>', html)
-
-    print(a)
-
-  # --- Bulleted lists
+  # Bulleted lists
+  
 
 
 
