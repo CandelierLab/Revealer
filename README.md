@@ -105,7 +105,7 @@ These settings have tobe defined before any slide is defined.
 | `> author:` *author Name*| **Author name**. Use multiple times to add other contributors. |
 | `> event:` *event name* | **Event name**. Typically the location and date. |
 | `> logo:` *path* | **Institutional logo**. Path to a logo to display on the first page. Can be used multiple times for several logos. |
-| `> theme:` *theme name* | **Theme**. Any [reveal.js theme](https://revealjs.com/themes/), or `'ljp'` (default). |
+| `> theme:` *theme name* | **Theme**. Any [reveal.js theme](https://revealjs.com/themes/), or `'revealer'` (default). |
 | `> codeTheme:` *code theme* | **Code theme**. A full list of available themes can be found [here](https://highlightjs.org/static/demo/). Default: `zenburn`. |
 | `> slideNumber:` *option* | **Slide numbers**. Disabled by default, manages how slides are numbered and displayed. Use any [value allowed by reveal.js](https://revealjs.com/slide-numbers/). |
 
@@ -118,3 +118,24 @@ These settings have tobe defined before any slide is defined.
 | `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
 | `> background: ` *path* | **Background image**. Defines a background image for the current slide. |
 | `> color: ` *color* | **Text color**. Defines the current slide text color. |
+
+### Other syntax tools
+
+#### Columns
+
+Specific tags are defined in the `revealer.css` style sheet (`revealer` theme) to define layouts with multiple columns:
+
+```
+This is a full width header.
+
+<multi-col>
+  <c->
+      First column here !
+  </c->
+  <c->
+      Second column here !
+  </c->
+</multi-col>
+```
+
+It works with any number of columns.

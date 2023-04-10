@@ -1,5 +1,5 @@
 /**
- * LJP theme for reveal.js.
+ * Revealer theme for reveal.js.
  *
  * Adapted from the white theme by Hakim El Hattab, http://hakim.se
  */
@@ -357,7 +357,7 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
 }
 
 /*********************************************
- * LJP CUSTOMIZATION
+ * REVEALER CUSTOMIZATION
  *********************************************/
 
 header {
@@ -413,3 +413,18 @@ header {
   margin: 20px 0 0 0; 
   color: grey;
 }
+
+muti-col {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+c- {
+    display: table-cell;
+    vertical-align: top;
+    width: 50%;
+    padding: 2% 0 2% 3%;
+}
+
+col:first-of-type { padding-left: 0; }

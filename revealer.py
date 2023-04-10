@@ -19,8 +19,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-# if os.path.isdir(rdir):
-#   shutil.rmtree(rdir)
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
@@ -111,7 +111,7 @@ with open(pfile, "r") as fid:
 
 # --- Default settings
 
-if 'theme' not in setting: setting['theme'] = 'ljp'
+if 'theme' not in setting: setting['theme'] = 'revealer'
 if 'codeTheme' not in setting: setting['codeTheme'] = 'zenburn'
 
 # --- Import template index.html
