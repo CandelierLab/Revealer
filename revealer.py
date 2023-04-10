@@ -257,18 +257,28 @@ for k, S in enumerate(slide):
   if 'header' in S['param'] and S['param']['header'] == 'none':
     content += '<style>.slide_{:d} header {{ display: none; }}</style>'.format(k)
 
-  content += S['html']
-  content += '</section>'
+  # --- Content ------------------------------------------------------------
+
+  html = S['html'].strip()
+
+  # --- Line return
+
+  if k==2:
+
+    a = re.sub('\n( +)?\n+', '<br>', html)
+
+    print(a)
+
+  # --- Bulleted lists
+
+
+
+  content += html + '\n</section>'
 
   # --- Section tags
 
   if S['type'] == 'lastchild':
      content += '</section>'
-
-# --- Content modifications -------------------------------------------------
-
-# --- Bulleted lists
-
 
 # --- Inject into html -----------------------------------------------------
 

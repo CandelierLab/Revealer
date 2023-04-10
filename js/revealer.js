@@ -1,8 +1,3 @@
-// $( document ).ready(function() {
-//   console.log( "ready!" );
-// });
-
-
 Reveal.on( 'slidechanged', event => {
 
   // Set slide title
