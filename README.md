@@ -104,7 +104,7 @@ Revealer accepts html in the pres file, just like in standard reveal.js presenta
 
 #### Presentation settings
 
-These settings have tobe defined before any slide is defined.
+These settings have to be defined before any slide is defined.
 
 | Command | Description |
 | --- | --- |
