@@ -138,8 +138,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-if os.path.isdir(rdir):
-  shutil.rmtree(rdir)
+# if os.path.isdir(rdir):
+#   shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
@@ -521,7 +521,6 @@ for k, S in enumerate(slide):
 
 # Headers
 out = out.replace('<body>', '<body>' + headers)
-
 
 s = '<div class="slides">\n'
 i = out.find(s) + len(s)

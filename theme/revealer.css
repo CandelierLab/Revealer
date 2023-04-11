@@ -372,8 +372,8 @@ header {
 
   background-color: #f0f0f0;
   border-bottom: 1px dashed grey; 
-  font-size: 2em;
-  padding: 10px 0;
+  font-size: 2.5em;
+  padding: 20px 0;
   font-family: var(--r-heading-font);
   font-weight: var(--r-heading-font-weight);
   word-wrap: break-word;
@@ -408,6 +408,7 @@ footer {
   top: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
+  padding: 10px 0;
   left: 0 !important;
   right: 0 !important;
   text-align: center !important;
