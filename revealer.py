@@ -3,6 +3,77 @@ import os
 import shutil
 import re
 
+class bibtex:
+
+  def __init__(self, bibfile):
+
+    # Definitions
+    self.item_num = []
+    self.item_tag = {}
+
+    # Import bibtex
+    import bibtexparser
+    with open(pdir + bibfile) as bibtex_file:
+      self.base = bibtexparser.load(bibtex_file)
+
+  def add_entry(self, tag):
+
+    # Check absence
+    if tag in self.item_tag: return
+
+    # --- Addition
+    
+    for entry in self.base.entries:
+      if entry['ID']==tag:
+
+        # --- Append entry
+
+        self.item_num.append(entry)
+        self.item_tag[tag] = entry
+
+        # --- Entry number
+
+        entry['revealer-number'] = len(self.item_num)
+
+        # --- Author short description
+
+        al = entry['author'].split(' and ')
+        sd = ''
+        for i, a in enumerate(al):
+
+          p = a.split(' ')          
+          for j in range(len(p)-1):
+            sd += p[j][0] + '. '
+          sd += p[-1]
+
+          if len(al)>2:
+            sd += ' <i>et. al</i>'
+            break
+          elif i<len(al)-1:
+            sd += ', '
+          
+        entry['authors-short'] = sd
+
+  def short_description(self, tag):
+
+    I = self.item_tag[tag]
+    s = '{:d}. {:s} ({:s})'.format(I['revealer-number'], I['authors-short'], I['year'])
+    return s
+  
+  def long_description(self, tag):
+
+    I = self.item_tag[tag]
+    # print(I)
+    s = '{:d}. {:s}: {:s} {:s} {:s} {:s}'.format(
+      I['revealer-number'], 
+      I['authors-short'], 
+      '<i>'+I['title']+'</i>,' if 'title' in I else '', 
+      I['journal'] if 'journal' in I else '', 
+      '('+I['year']+')' if 'year' in I else '',
+      ' - <a class="doi" href="https://doi.org/{:s}">{:s}</a>'.format(I['doi'], I['doi']) if 'doi' in I else '', 
+    )
+    return s
+        
 def contentify(html, lbib=True):
 
   lines = html.strip().split('\n')
@@ -120,6 +191,14 @@ with open(pfile, "r") as fid:
       notes = False
       continue
 
+    # --- Bibliography
+
+    s = '>>> biblio'
+    if line.startswith(s):
+      slide.append({'type': 'biblio', 'title': 'Bibliography', 'html': '', 'notes': '', 'param': {}})
+      notes = False
+      continue
+
     # --- Settings
     
     if line.startswith('>'):
@@ -134,7 +213,12 @@ with open(pfile, "r") as fid:
         if len(slide):
 
           # Slide settings
-          slide[-1]['param'][x.group(1)] = x.group(2)
+          if x.group(1) in slide[-1]['param']:
+            if not isinstance(slide[-1]['param'][x.group(1)], list):
+              slide[-1]['param'][x.group(1)] = [slide[-1]['param'][x.group(1)]]
+            slide[-1]['param'][x.group(1)].append(x.group(2))
+          else:
+            slide[-1]['param'][x.group(1)] = x.group(2)
 
         else:
 
@@ -154,6 +238,13 @@ with open(pfile, "r") as fid:
       else:
         slide[-1]['html'] += line
 
+# === Bibliography =========================================================
+
+if 'bibtex' in setting:
+  biblio = bibtex(setting['bibtex'])
+else:
+  biblio = None
+
 # === Output ===============================================================
 
 # --- Default settings
@@ -161,6 +252,7 @@ with open(pfile, "r") as fid:
 if 'theme' not in setting: setting['theme'] = 'revealer'
 if 'codeTheme' not in setting: setting['codeTheme'] = 'zenburn'
 if 'notesSize' not in setting: setting['notesSize'] = '1em'
+if 'maxRefsPerPage' not in setting: setting['maxRefsPerPage'] = 5
 
 # --- Import template index.html
 
@@ -194,53 +286,54 @@ for old, new in rList:
 
 out = out.replace('</body>', '<script src="reveal.js/js/jquery.min.js"></script>\n<script src="reveal.js/js/revealer.js"></script>\n</body>')
 
-
 # --- Content --------------------------------------------------------------
 
 # --- Build content
 
-headers = '<header></header>'
+headers = '<header></header><footer></footer>'
 content = ''
 
 for k, S in enumerate(slide):
 
   # --- Section tags -------------------------------------------------------
 
-  # Parenting section
-  if S['type'] == 'parent':
-    content += '<section data-transition="none">'
-     
-  # Base options
-  opt =  'data-transition="none" data-state="slide_{:d}"'.format(k)
+  if S['type'] != 'biblio':
 
-  # --- Section parameters
+    # Parenting section
+    if S['type'] == 'parent':
+      content += '<section data-transition="none">'
+      
+    # Base options
+    opt = 'data-transition="none" data-state="slide_{:d}"'.format(k)
 
-  # Visibility
-  if 'visibility' in S['param'] and S['param']['visibility']=='hidden':
-    opt += ' data-visibility="hidden"'
+    # --- Section parameters
 
-  # Background
-  if 'background' in S['param']:
-    if S['param']['background'].find('.')==-1:
-      opt += ' data-background-color="{:s}"'.format(S['param']['background'])
-    else:
-      opt += ' data-background-image="{:s}"'.format(S['param']['background'])
+    # Visibility
+    if 'visibility' in S['param'] and S['param']['visibility']=='hidden':
+      opt += ' data-visibility="hidden"'
 
-  # Other parameters
-  if 'attr' in S['param']:
-    if isinstance(S['param']['attr'], list):
-      pass
-    else:
-      opt += ' ' + S['param']['attr']
+    # Background
+    if 'background' in S['param']:
+      if S['param']['background'].find('.')==-1:
+        opt += ' data-background-color="{:s}"'.format(S['param']['background'])
+      else:
+        opt += ' data-background-image="{:s}"'.format(S['param']['background'])
 
-  content += '<section {:s}>'.format(opt)
+    # Other parameters
+    if 'attr' in S['param']:
+      if isinstance(S['param']['attr'], list):
+        pass
+      else:
+        opt += ' ' + S['param']['attr']
 
-  # --- Slide styling ------------------------------------------------------
+    content += '<section {:s}>'.format(opt)
 
-   # Color
-  if 'color' in S['param']:
-    content += '<style>.slide_{:d} section, .slide_{:d} h1, .slide_{:d} h2, .slide_{:d} h3, .slide_{:d} p {{ color: {:s}; }}</style>'.format(k,k,k,k,k, S['param']['color'])
-  
+    # --- Slide styling ------------------------------------------------------
+
+    # Color
+    if 'color' in S['param']:
+      content += '<style>.slide_{:d} section, .slide_{:d} h1, .slide_{:d} h2, .slide_{:d} h3, .slide_{:d} p {{ color: {:s}; }}</style>'.format(k,k,k,k,k, S['param']['color'])
+    
   # --- Slide specialization -----------------------------------------------
 
   match S['type']:
@@ -293,6 +386,46 @@ for k, S in enumerate(slide):
       # Title
       content += '<h1>' + S['title']+ '</h1>'
 
+    case 'biblio':
+
+      if biblio is not None:
+
+        npages = ((len(biblio.item_num)-1) // setting['maxRefsPerPage']) + 1        
+        sindex = 0
+
+        content += '<section data-transition="none">'
+
+        for i in range(npages):
+          
+          # --- Section
+
+          content += '<section data-transition="none" data-state="slide_{:d}">'.format(k+i)
+
+          # --- Title
+
+          title = S['param']['title'] if 'title' in S['param'] else S['title']
+          if npages==1:
+            content += '<div class="slide_header">{:s}</div>'.format(title)
+          else:
+            content += '<div class="slide_header">{:s} - {:d}/{:d}</div>'.format(title, i+1, npages)
+          
+          # --- Items
+
+          for j in range(sindex, min(sindex+setting['maxRefsPerPage'], len(biblio.item_num))):
+            
+            content += '<div class="biblio-long">' + biblio.long_description(biblio.item_num[j]['ID']) + '</div>'
+
+          # Update slide index
+          sindex += setting['maxRefsPerPage']
+          
+          # Close slide
+          content += '</section>'
+
+        # Close parent slide
+        content += '</section>'
+
+      continue
+
     case _:
 
       content += '<div class="slide_header">{:s}</div>'.format(S['title'])
@@ -312,8 +445,39 @@ for k, S in enumerate(slide):
 
     html += contentify(S['notes'], lbib=False) + '</aside>'
 
-  if k==1:
-    print(S, html)
+  # --- Bibliography
+
+  if 'cite' in S['param']:
+
+    # Check
+    if biblio is None:
+      pass
+
+    else:
+
+      # Check list
+      if not isinstance(S['param']['cite'], list):
+        S['param']['cite'] = [S['param']['cite']]
+
+      # --- Add entries and collect short descriptions
+
+      sd = ''
+      
+      for tag in S['param']['cite']:
+        if tag not in biblio.item_tag:
+          biblio.add_entry(tag)
+          sd += '<div class="biblio-short">' + biblio.short_description(tag) + '</div>'
+      
+      # --- Footer
+
+      # Set footer content
+      content += '<div class="slide_footer">{:s}</div>'.format(sd)
+
+      # Show footer
+      content += '<style>.slide_{:d} footer {{ display: block; }}</style>'.format(k)
+
+  # if k==1:
+    # print(S, html)
 
   content += html + '\n</section>'
 

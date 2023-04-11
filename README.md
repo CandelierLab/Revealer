@@ -7,9 +7,11 @@ In a mindset close to LaTeX, presentations are defined by a single text file con
 ## Installation
 
 Installation is as simple as:
+* Having an operational Python installation (version >=3.10).
 * Clone Revealer in a `Revealer` folder somewhere on your filesystem.
 * Add the latest version of reveal.js in a `reveal.js` folder inside the `Revealer` folder. Do not hesitate to supercharge it with plugins, like the chalkboard or Math support.
 * Configure VScode as described below.
+* Optionnal, to use the bibliography: install the `bibtexparser` Python library.
 * Optionnal: reveal your first presentation out of the `Demo.pres` file.
 
 Then, Revealer can be used on any file with the `.pres` extension, located anywhere in your fileystem.
@@ -43,6 +45,14 @@ Now, every time you save a `.pres` file in VScode the following actions are trig
 Install the `Live Server` VScode extension.
 
 Open your `.html` file and click `Go Live` to display the live view in your browser. This view will be updated every time you save a modification to the `.pres` file. You can then close the html file in VScode.
+
+### Bibliography
+
+To use the bibliography you'll need the [`bibtexparser`](https://bibtexparser.readthedocs.io/en/master/index.html) library:
+
+```
+pip install bibtexparser
+```
 
 ### Additional plugins
 
@@ -102,7 +112,7 @@ Revealer accepts html in the pres file, just like in standard reveal.js presenta
 | `===` *title* | **Horizontal slide**. |
 | `---` *title* | **Vertical slide**. |
 | `%%%` *section title* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. |
-| `>>> biblio` | **Bibliography slide(s)**. Automatically add slides with a formated bibliography based on the references defined by the `> cite:` command. |
+| `>>> biblio` | **Bibliography slide(s)**. Automatically add slides with a formated bibliography based on the references defined by the `> cite:` command. The title of the slides can be modified with the `> title:` command. |
 
 #### Presentation settings
 
@@ -128,7 +138,7 @@ These settings have to be defined before any slide is defined.
 | `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
 | `> background: ` *path*/*color* | **Background**. Defines a background image or color for the current slide. |
 | `> color: ` *color* | **Text color**. Defines the current slide text color. |
-| `> cite: ` *refID* | **Citation**. Cites the reference (defined by *refID* in the associated `bibtex` file) in the current slide. A short description is automatically inserted at the bottom of the slide and a superscript marker can be added anywhere in the slide with `<refID>`. The complete description of the reference is added in the bibliography slide. The maximal number of short descriptions is 4 by slide; if more citations are made, they are added to the bilbiography and can be refered to with a superscript tag, but the short descriptions are skipped. |
+| `> cite: ` *refID* | **Citation**. Cites the reference (defined by *refID* in the associated `bibtex` file) in the current slide. A short description is automatically inserted at the bottom of the slide and a superscript marker can be added anywhere in the slide with `<refID>`. The complete description of the reference is added in the bibliography slide. |
 | `> notes:` *size* | **Notes**. Everything after this command will be displayed in the speaker's view only. The *size* attribute sets the font size in the notes, and is optional. |
 | `> attr:` *attr* | **Attributes**. String of attributes to append to the `<section>` tag. Useful for inserting reveal.js attributes. |
 
