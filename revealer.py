@@ -8,18 +8,29 @@ class bibtex:
   def __init__(self, bibfile):
 
     # Definitions
+    self.error = None
     self.item_num = []
     self.item_tag = {}
 
-    # Import bibtex
-    import bibtexparser
-    with open(pdir + bibfile) as bibtex_file:
-      self.base = bibtexparser.load(bibtex_file)
+    # Check file existence
+    bfile = pdir + bibfile
+    if not os.path.exists(bfile):
+      self.error = 'Bibtex file "{:s}" not found.'.format(bfile)
+
+    else:
+
+      # Import bibtex
+      import bibtexparser      
+      with open(bfile) as bibtex_file:
+        self.base = bibtexparser.load(bibtex_file)
 
   def add_entry(self, tag):
 
+    # Check error status
+    if self.error is not None: return
+
     # Check absence
-    if tag in self.item_tag: return
+    if tag in self.item_tag: return    
 
     # --- Addition
     
@@ -56,11 +67,17 @@ class bibtex:
 
   def short_description(self, tag):
 
+    # Check error status
+    if self.error is not None: return ''
+
     I = self.item_tag[tag]
     s = '{:d}. {:s} ({:s})'.format(I['revealer-number'], I['authors-short'], I['year'])
     return s
   
   def long_description(self, tag):
+
+    # Check error status
+    if self.error is not None: return ''
 
     I = self.item_tag[tag]
     # print(I)
@@ -450,11 +467,8 @@ for k, S in enumerate(slide):
   if 'cite' in S['param']:
 
     # Check
-    if biblio is None:
-      pass
-
-    else:
-
+    if biblio is not None and biblio.error is None:
+      
       # Check list
       if not isinstance(S['param']['cite'], list):
         S['param']['cite'] = [S['param']['cite']]
