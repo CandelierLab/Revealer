@@ -9,7 +9,7 @@ In a mindset close to LaTeX, presentations are defined by a single text file con
 Installation is as simple as:
 * Having an operational Python installation (version >=3.10).
 * Clone Revealer in a `Revealer` folder somewhere on your filesystem.
-* Add the latest version of reveal.js in a `reveal.js` folder inside the `Revealer` folder. Do not hesitate to supercharge it with plugins, like the chalkboard or Math support.
+* Add the latest version of reveal.js in a `reveal.js` folder inside the `Revealer` folder. Do not hesitate to supercharge it with plugins, like the chalkboard, math support or even [embed-video](https://github.com/ThomasWeinert/reveal-embed-video) for live streaming from a webcam.
 * Configure VScode as described below.
 * Optionnal, to use the bibliography: install the `bibtexparser` Python library.
 * Optionnal: reveal your first presentation out of the `Demo.pres` file.

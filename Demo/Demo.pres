@@ -77,4 +77,66 @@ Or simply <a href="">click here</a> <br>
 
 Caveat: only works with Chrome
 
-%%% Section slide
+%%% Lots of media are supported
+> background: Media/Images/Backgrounds/bkg2.jpg
+> color: white
+
+=== Images and figures
+
+||
+<img src="Media/Images/Jean_Perrin_1927.jpg" alt="">
+|
+<br>
+Supported formats:
+* svg
+* png
+* jpg
+* gif
+* tiff ...
+
+Transparency supported
+||
+
+=== Audio files
+
+<audio controls>
+  <source src="Media/Audio/vibraphone.mp3" type="audio/mpeg">
+</audio>
+
+<br> <br> <hr> <br>
+
+@@
+<audio controls>
+  <source src="Media/Audio/vibraphone.mp3" type="audio/mpeg">
+</audio>
+@@
+
+Supported formats: mp3, ogg, wav
+
+=== Movies
+
+<br>
+<video controls="" autoplay="" src="Media/Movies/Sample_earth.mp4" width="65%"></video>
+
+<br> <hr>
+@@
+&lt; video controls="" src="Media/Movies/video.mp4"></video>
+@@
+
+<a href="https://www.w3schools.com/html/html5_video.asp">Supported formats</a> include mp4, ogg, WebM.
+
+=== Stream your local camera
+
+@@ data-line-numbers
+<section data-video="stream">
+  <h1>Stream your local camera</h1>
+</section>
+@@
+
+<br>
+Check exemple below 😉 <br> <br>
+
+If you have multiple video inputs (<i>e.g.</i> front ant rear camera) you can click on the video to cycle through (only works only with Chrome).
+
+--- Stream your local camera
+> attr: data-video="big top-right"

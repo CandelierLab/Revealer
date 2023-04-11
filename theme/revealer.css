@@ -472,7 +472,7 @@ footer {
 
 .biblio-long:first-of-type { margin-top: 0; }
 
-header i, footer i, .biblio-long i {
+.reveal i, header i, footer i, .biblio-long i {
   /* For some reason ... */
   font-style: italic;
 }

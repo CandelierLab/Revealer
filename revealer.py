@@ -133,7 +133,7 @@ def contentify(html):
         html += '<li>' + line[2:] + '</li>'
 
       elif blmode:
-        html += '</ul>'
+        html += '</ul><br>'
         blmode = False
 
       # --- Multiple columns
@@ -172,8 +172,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-# if os.path.isdir(rdir):
-#   shutil.rmtree(rdir)
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
