@@ -91,31 +91,65 @@ class bibtex:
     )
     return s
         
-def contentify(html, lbib=True):
+def contentify(html):
 
   lines = html.strip().split('\n')
   html = ''
+  codemode = False
+  blmode = False
   colmode = False
 
   # Bullet lists
   for i, line in enumerate(lines):
     
-    if line.startswith('*'):
-      html += '<ul><li>' + line[2:] + '</li></ul>'
-      if lbib: html += '<br>'
+    # --- Code snippets
 
-    elif line == '||':
-      if colmode:
-        html += '</div></div>'
+    if line.startswith('@@'):
+
+      if codemode:
+        html += '</code></pre>'
+        codemode = False
+
       else:
-        html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
-      colmode = not colmode
+        html += '<pre><code class="codeblock"{:s}>'.format(' '+line[2:].strip() if len(line)>2 else '')
+        codemode = True
 
-    elif colmode and line == '|':
-      html += '</div><div class="column">'
+      continue
+
+    if codemode:
+
+      html += line
 
     else:
-      html += line
+
+      # --- Bullet lists
+
+      if line.startswith('*'):
+
+        if not blmode: 
+          html += '<ul>'
+          blmode = True
+
+        html += '<li>' + line[2:] + '</li>'
+
+      elif blmode:
+        html += '</ul>'
+        blmode = False
+
+      # --- Multiple columns
+
+      elif line == '||':
+        if colmode:
+          html += '</div></div>'
+        else:
+          html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
+        colmode = not colmode
+
+      elif colmode and line == '|':
+        html += '</div><div class="column">'
+
+      else:
+        html += line
 
     if not line.startswith('<pre>'):
       html += '\n'
@@ -128,7 +162,7 @@ def contentify(html, lbib=True):
 try:
   pfile = sys.argv[1]
 except:
-  pfile = '/home/raphael/Science/Presentations/Test/Presentation.pres'
+  pfile = '/home/raphael/Science/Presentations/Revealer/Demo/Demo.pres'
 
 # Presentation path
 pdir = os.path.dirname(pfile)+'/'
@@ -138,8 +172,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-if os.path.isdir(rdir):
-  shutil.rmtree(rdir)
+# if os.path.isdir(rdir):
+#   shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
@@ -266,6 +300,7 @@ else:
 
 # --- Default settings
 
+if 'title' not in setting: setting['title'] = 'Revealer'
 if 'theme' not in setting: setting['theme'] = 'revealer'
 if 'codeTheme' not in setting: setting['codeTheme'] = 'zenburn'
 if 'notesSize' not in setting: setting['notesSize'] = '1em'
@@ -289,6 +324,7 @@ for old, new in rList:
 # --- Settings
 
 rList = [
+  ('<title>reveal.js</title>', '<title>'+setting['title']+'</title>'),
   ('monokai.css', setting['codeTheme'] + '.css'),
   ('theme/black.css', 'theme/{:s}.css'.format(setting['theme'])),
 ]
@@ -456,11 +492,9 @@ for k, S in enumerate(slide):
   html = contentify(S['html'])
   if len(S['notes']):
     
-    nS = S['param']['notes'] if 'notes' in S['param'] else setting['notesSize']
-   
+    nS = S['param']['notes'] if 'notes' in S['param'] else setting['notesSize']   
     html += '<aside class="notes"><style>.speaker-controls-notes {font-size: ' + nS + ';} .speaker-controls-notes ul {margin: 0px; padding-left: 10px;}</style>'
-
-    html += contentify(S['notes'], lbib=False) + '</aside>'
+    html += contentify(S['notes']) + '</aside>'
 
   # --- Bibliography
 
@@ -506,9 +540,6 @@ for k, S in enumerate(slide):
 
       # Show footer
       content += '<style>.slide_{:d} footer {{ display: block; }}</style>'.format(k)
-
-  # if k==1:
-    # print(S, html)
 
   content += html + '\n</section>'
 

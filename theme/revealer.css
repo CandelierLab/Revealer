@@ -22,7 +22,7 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   --r-heading-color: #222;
   --r-heading-line-height: 1.2;
   --r-heading-letter-spacing: normal;
-  --r-heading-text-transform: uppercase;
+  --r-heading-text-transform: none;
   --r-heading-text-shadow: none;
   --r-heading-font-weight: 600;
   --r-heading1-text-shadow: none;
@@ -218,8 +218,7 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
 
 .reveal code {
   font-family: var(--r-code-font);
-  text-transform: none;
-  tab-size: 2;
+  tab-size: 2;  
 }
 
 .reveal pre code {
@@ -236,6 +235,13 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
 
 .reveal .code-wrapper code {
   white-space: pre;
+}
+
+code:not(.codeblock) {
+  border-radius: 10px;
+  padding: 3px 12px;
+  font-size: 0.7em;
+  background: lightgray;
 }
 
 .reveal table {

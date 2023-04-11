@@ -144,6 +144,20 @@ These settings have to be defined before any slide is defined.
 
 ### Other syntaxes
 
+#### Code snippets
+
+Code snippets can be displayed placed `@@`:
+
+```
+@@
+Place = some
+code(here)
+# and.enjoy
+@@
+```
+
+Reveal.js attributes for the code tag (like `data-line-numbers` for instance) can be added after the first `@@`.
+
 #### Columns
 
 Layouts with multiple columns can be defined with this syntax:
