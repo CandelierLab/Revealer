@@ -3,6 +3,37 @@ import os
 import shutil
 import re
 
+def contentify(html, lbib=True):
+
+  lines = html.strip().split('\n')
+  html = ''
+  colmode = False
+
+  # Bullet lists
+  for i, line in enumerate(lines):
+    
+    if line.startswith('*'):
+      html += '<ul><li>' + line[2:] + '</li></ul>'
+      if lbib: html += '<br>'
+
+    elif line == '||':
+      if colmode:
+        html += '</div></div>'
+      else:
+        html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
+      colmode = not colmode
+
+    elif colmode and line == '|':
+      html += '</div><div class="column">'
+
+    else:
+      html += line
+
+    if not line.startswith('<pre>'):
+      html += '\n'
+
+  return html
+
 # === Settings =============================================================
 
 # Presentation file name
@@ -42,6 +73,7 @@ if not os.path.isdir(rdir):
 
 setting = {}
 slide = []
+notes = False
 
 with open(pfile, "r") as fid:
   for line in fid:
@@ -55,21 +87,24 @@ with open(pfile, "r") as fid:
 
     s = '>>> first: '
     if line.startswith(s):
-      slide.append({'type': 'first', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
+      slide.append({'type': 'first', 'title': line[len(s):].strip(), 'html': '', 'notes': '', 'param': {}})
+      notes = False
       continue
 
     # --- Section slides
 
     s = r'%%% '
     if line.startswith(s):
-      slide.append({'type': 'section', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
+      slide.append({'type': 'section', 'title': line[len(s):].strip(), 'html': '', 'notes': '', 'param': {}})
+      notes = False
       continue
 
     # --- Regular slide
 
     s = '=== '
     if line.startswith(s):
-      slide.append({'type': 'slide', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
+      slide.append({'type': 'slide', 'title': line[len(s):].strip(), 'html': '', 'notes': '', 'param': {}})
+      notes = False
       continue
 
     # --- Children slides
@@ -81,12 +116,17 @@ with open(pfile, "r") as fid:
           slide[-1]['type'] = 'child'
         case _:
           slide[-1]['type'] = 'parent'
-      slide.append({'type': 'lastchild', 'title': line[len(s):].strip(), 'html': '', 'param': {}})
+      slide.append({'type': 'lastchild', 'title': line[len(s):].strip(), 'html': '', 'notes': '', 'param': {}})
+      notes = False
       continue
 
     # --- Settings
     
     if line.startswith('>'):
+
+      # Notes
+      if line.startswith('> notes:'):
+        notes = True
 
       x = re.search('^> ([^:]*): (.*)', line)
       if x:
@@ -109,7 +149,10 @@ with open(pfile, "r") as fid:
     # --- Slide content
 
     if len(slide) and not line.startswith('>'):
-      slide[-1]['html'] += line
+      if notes:
+        slide[-1]['notes'] += line
+      else:
+        slide[-1]['html'] += line
 
 # === Output ===============================================================
 
@@ -117,6 +160,7 @@ with open(pfile, "r") as fid:
 
 if 'theme' not in setting: setting['theme'] = 'revealer'
 if 'codeTheme' not in setting: setting['codeTheme'] = 'zenburn'
+if 'notesSize' not in setting: setting['notesSize'] = '1em'
 
 # --- Import template index.html
 
@@ -259,34 +303,17 @@ for k, S in enumerate(slide):
 
   # --- Content ------------------------------------------------------------
 
-  html = ''
-  lines = S['html'].strip().split('\n')
-  colmode = False
-
-  # Bullet lists
-  for i, line in enumerate(lines):
+  html = contentify(S['html'])
+  if len(S['notes']):
     
-    if line.startswith('*'):
-      html += '<ul><li>' + line[2:] + '</li></ul><br>'
+    nS = S['param']['notes'] if 'notes' in S['param'] else setting['notesSize']
+   
+    html += '<aside class="notes"><style>.speaker-controls-notes {font-size: ' + nS + ';} .speaker-controls-notes ul {margin: 0px; padding-left: 10px;}</style>'
 
-    elif line == '||':
-      if colmode:
-        html += '</div></div>'
-      else:
-        html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
-      colmode = not colmode
+    html += contentify(S['notes'], lbib=False) + '</aside>'
 
-    elif colmode and line == '|':
-      html += '</div><div class="column">'
-
-    else:
-      html += line
-
-    if not line.startswith('<pre>'):
-      html += '\n'
-
-  if k==2:
-    print(html)
+  if k==1:
+    print(S, html)
 
   content += html + '\n</section>'
 
