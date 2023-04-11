@@ -270,6 +270,8 @@ for k, S in enumerate(slide):
 
     html += '<br>\n'
 
+  print(html)
+
   content += html + '\n</section>'
 
   # --- Section tags

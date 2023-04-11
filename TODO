@@ -1,9 +1,17 @@
 Full demo
 
 Bug fix:
-- Title disapears upon refresh
+- Pas de <br> dans les équations ou dans le code
+
 
 Notes
 Bibliography
 Print
+Arrows style
+Options:
+- loop: true
+- progress: true
+- autoPlayMedia: null
+- transition: none
+- backgroundTransition: 'fade'
 
