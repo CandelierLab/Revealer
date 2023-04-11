@@ -372,7 +372,7 @@ header {
 
   background-color: #f0f0f0;
   border-bottom: 1px dashed grey; 
-  font-size: 2.5em;
+  font-size: 6vh;
   padding: 20px 0;
   font-family: var(--r-heading-font);
   font-weight: var(--r-heading-font-weight);
@@ -391,8 +391,8 @@ footer {
 
   background-color: #f0f0f0;
   border-top: 1px dashed grey; 
-  font-size: 0.8em;
-  padding: 10px 0;
+  font-size: 2.5vh;
+  padding: 2% 0;
   font-family: var(--r-heading-font);
   word-wrap: break-word;
 }
@@ -460,13 +460,13 @@ footer {
   margin-top: 20px;
 }
 
-.biblio-long i {
-  /* For some reason ... */
-  font-style: italic;
-}
-
 .biblio-long .doi {
   font-size: 0.8em;
 }
 
 .biblio-long:first-of-type { margin-top: 0; }
+
+header i, footer i, .biblio-long i {
+  /* For some reason ... */
+  font-style: italic;
+}

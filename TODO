@@ -3,8 +3,4 @@ Full demo
 Print
 Options:
 - loop: true
-- progress: true
 - autoPlayMedia: null
-- transition: none
-- backgroundTransition: 'fade'
-
