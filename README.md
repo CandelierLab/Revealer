@@ -48,7 +48,9 @@ Open your `.html` file and click `Go Live` to display the live view in your brow
 
 You may also want to add these additional VScode plugins for convenience:
 
+* [Emmet](https://docs.emmet.io/), a web-developer's toolkit that can greatly improve HTML workflow.
 * [BibManager](https://github.com/twday/vscode-bibmanager), for managing `bibtex` files.
+
 
 ## Using Revealer
 
@@ -129,23 +131,20 @@ These settings have to be defined before any slide is defined.
 | `> notes:` | **Notes**. Everything after this command will be displayed in the speaker's view only. |
 | `> attr:` *attr* | **Attributes**. String of attributes to append to the `<section>` tag. Useful for inserting reveal.js attributes. |
 
-### Other syntax tools
+### Other syntaxes
 
 #### Columns
 
-Specific html tags are defined in the `revealer.css` style sheet (`revealer` theme) to define layouts with multiple columns:
+Layouts with multiple columns can be defined with this syntax:
 
 ```
-This is a full width header.
-
-<multi-col>
-  <c->
-      First column here !
-  </c->
-  <c->
-      Second column here !
-  </c->
-</multi-col>
+||
+First column
+|
+Second column
+|
+Third column
+||
 ```
 
 It works with any number of columns.

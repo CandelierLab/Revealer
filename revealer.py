@@ -19,8 +19,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-# if os.path.isdir(rdir):
-#   shutil.rmtree(rdir)
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
@@ -261,16 +261,32 @@ for k, S in enumerate(slide):
 
   html = ''
   lines = S['html'].strip().split('\n')
+  colmode = False
 
+  # Bullet lists
   for i, line in enumerate(lines):
+    
     if line.startswith('*'):
-      html += '<ul><li>' + line[2:] + '</li></ul>'
+      html += '<ul><li>' + line[2:] + '</li></ul><br>'
+
+    elif line == '||':
+      if colmode:
+        html += '</div></div>'
+      else:
+        html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
+      colmode = not colmode
+
+    elif colmode and line == '|':
+      html += '</div><div class="column">'
+
     else:
       html += line
 
-    html += '<br>\n'
+    if not line.startswith('<pre>'):
+      html += '\n'
 
-  print(html)
+  if k==2:
+    print(html)
 
   content += html + '\n</section>'
 

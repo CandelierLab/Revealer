@@ -418,17 +418,9 @@ header {
   color: grey;
 }
 
-muti-col {
-  display: table;
-  table-layout: fixed;
-  width: 100%;
+.column {
+  max-width: 47%;
+  margin: 2% 0 2% 2%;
 }
 
-c- {
-    display: table-cell;
-    vertical-align: top;
-    width: 50%;
-    padding: 2% 0 2% 3%;
-}
-
-col:first-of-type { padding-left: 0; }
+.column:first-of-type { padding-left: 0; } 
