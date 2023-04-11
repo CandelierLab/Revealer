@@ -140,3 +140,12 @@ If you have multiple video inputs (<i>e.g.</i> front ant rear camera) you can cl
 
 --- Stream your local camera
 > attr: data-video="big top-right"
+
+=== Animated SVG
+
+<svg id="Media/Animated/test_svg"></svg>
+
+Instructions: <br>
+* Double-click the square
+* Drag to scale
+
