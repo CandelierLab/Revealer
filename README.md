@@ -138,7 +138,7 @@ These settings have to be defined before any slide is defined.
 | `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
 | `> background: ` *path*/*color* | **Background**. Defines a background image or color for the current slide. |
 | `> color: ` *color* | **Text color**. Defines the current slide text color. |
-| `> cite: ` *refID* | **Citation**. Cites the reference (defined by *refID* in the associated `bibtex` file) in the current slide. A short description is automatically inserted at the bottom of the slide and a superscript marker can be added anywhere in the slide with `<refID>`. The complete description of the reference is added in the bibliography slide. |
+| `> cite: ` *refID* | **Citation**. Cites the reference (defined by *refID* in the associated `bibtex` file) in the current slide. A short description is automatically inserted at the bottom of the slide and superscript markers can be added anywhere in the slide with `<ref:refID1,refID2,...>`. The complete description of the reference is added in the bibliography slide. |
 | `> notes:` *size* | **Notes**. Everything after this command will be displayed in the speaker's view only. The *size* attribute sets the font size in the notes, and is optional. |
 | `> attr:` *attr* | **Attributes**. String of attributes to append to the `<section>` tag. Useful for inserting reveal.js attributes. |
 

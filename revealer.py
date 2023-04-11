@@ -468,6 +468,23 @@ for k, S in enumerate(slide):
           biblio.add_entry(tag)
           sd += '<div class="biblio-short">' + biblio.short_description(tag) + '</div>'
       
+      # --- Superscript references
+      
+      for match in reversed(list(re.finditer('<ref:([^>]*)>', html))):
+
+        try:
+
+          # Generate html
+          m = match.group()
+          rhtml = '<sup>' + ','.join([str(biblio.item_tag[tag.strip()]['revealer-number']) for tag in m[5:-1].split(',')]) + '</sup>'
+
+          # Replace html
+          s = match.span()
+          html = html[0:s[0]] + rhtml + html[s[1]:]
+
+        except:
+          pass
+
       # --- Footer
 
       # Set footer content
