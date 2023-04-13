@@ -172,8 +172,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-if os.path.isdir(rdir):
-  shutil.rmtree(rdir)
+# if os.path.isdir(rdir):
+#   shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
@@ -437,7 +437,7 @@ for k, S in enumerate(slide):
       S['param']['header'] = 'none'
 
       # Title
-      content += '<h1>' + S['title']+ '</h1>'
+      content += '<h1 class"relief">' + S['title']+ '</h1>'
 
     case 'biblio':
 
