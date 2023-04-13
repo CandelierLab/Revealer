@@ -1,0 +1,80 @@
+# --- SETTINGS--------------------------------------------------------------
+
+> author: First author
+> author: Second author
+> event: Anywhere, 01/01/4321
+
+> logo: Media/Images/Logos/SU.png
+> logo: Media/Images/Logos/LJP.png
+> logo: Media/Images/Logos/CNRS.png
+
+> slideNumber: c/t
+
+> bibtex: biblio.bib
+
+# --- CONTENT---------------------------------------------------------------
+
+>>> first: Revealer demo
+> subtitle: Based on reveal.js
+
+=== Principle
+
+Slides are designed with text! <br> <br>
+
+This whole presentation has been created just by typing html in a text editor. <br>
+
+@@ data-line-numbers
+==&#61; Principle
+
+Slides are designed with text! <br>
+
+This whole presentation has been created just by typing
+html in a text editor.
+@@
+
+--- How does it work?
+
+<a href="https://revealjs.com/" target="_blank">Reveal.js</a> formats presentations for web browsers <br> <br>
+
+Watch the demo for an introduction 😀 <br>
+
+--- Which text editor?
+
+Any text editor will do the job <br> <br>
+
+But <a href="https://code.visualstudio.com/" target="_blank">VScode</a> is a good companion editor <br>
+with the <code>Run on save</code> and <code>Live Server</code> plugins
+
+=== The interface is highly controllable
+
+Try the key bindings! <br><br>
+
+* Slide navigation: Arrows
+* Zoom: Ctrl + Click
+* Full screen: F / ESC
+* Speaker's view: S
+* Slide overview: ESC
+
+--- This template is highly customisable
+
+* Change content and structure
+* Include your own logos
+* Develop your own features
+
+--- Export to pdf
+> visibility: hidden
+
+You can export to pdf by adding <code>?print-pdf</code> <br> to the presentation's URL <br>
+
+<pre><code class="codeblock">
+path/to/my/pres/index.html?print-pdf
+path/to/my/pres/index.html?print-pdf&showNotes=true
+</code></pre>
+
+<br>
+
+Or simply <a href="">click here</a> <br>
+
+Caveat: only works with Chrome
+
+%%% Section slide
