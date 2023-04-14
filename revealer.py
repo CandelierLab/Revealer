@@ -377,6 +377,10 @@ for k, S in enumerate(slide):
     if 'visibility' in S['param'] and S['param']['visibility']=='hidden':
       opt += ' data-visibility="hidden"'
 
+    # Dark mode
+    if 'style' in S['param'] and S['param']['style']=='dark':
+      opt += ' class="dark"'
+
     # Background
     if 'background' in S['param']:
       if S['param']['background'].find('.')==-1:

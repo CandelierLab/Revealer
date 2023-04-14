@@ -476,3 +476,15 @@ footer {
   /* For some reason ... */
   font-style: italic;
 }
+
+/* --- Dark style --- */
+
+.dark {
+  background: black;
+  color: #f1faee;
+}
+
+.dark_fixed {
+  background: #1B262C;
+  color: #edf6f9;
+}
