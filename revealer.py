@@ -70,6 +70,8 @@ class bibtex:
         match entry['journal']:
           case 'Proceedings of the National Academy of Sciences of the United States of America':
             entry['journal-short'] = 'PNAS'
+          case 'Physical Review Letters':
+            entry['journal-short'] = 'PRL'
 
 
   def short_description(self, tag):
