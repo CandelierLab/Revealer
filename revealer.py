@@ -65,13 +65,23 @@ class bibtex:
           
         entry['authors-short'] = sd
 
+        # --- Journal  short description
+
+        match entry['journal']:
+          case 'Proceedings of the National Academy of Sciences of the United States of America':
+            entry['journal-short'] = 'PNAS'
+
+
   def short_description(self, tag):
 
     # Check error status
     if self.error is not None: return ''
 
     I = self.item_tag[tag]
-    s = '{:d}. {:s} ({:s})'.format(I['revealer-number'], I['authors-short'], I['year'])
+    if 'journal-short' in I:
+      s = '{:d}. {:s}, <i>{:s}</i> ({:s})'.format(I['revealer-number'], I['authors-short'], I['journal-short'], I['year'])
+    else:
+      s = '{:d}. {:s} ({:s})'.format(I['revealer-number'], I['authors-short'], I['year'])
     return s
   
   def long_description(self, tag):
