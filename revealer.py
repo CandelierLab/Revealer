@@ -453,7 +453,7 @@ for k, S in enumerate(slide):
       S['param']['header'] = 'none'
 
       # Reset margin
-      content += '<style>.reveal { margin-top: 0; }</style>'
+      content += '<style>.reveal .slides { margin-top: 0; }</style>'
 
       # Title
       if 'relief' in S['param'] and S['param']['relief']=='none':
