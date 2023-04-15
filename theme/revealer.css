@@ -490,6 +490,10 @@ h1.relief {
     2px 2px 0 #000;  
 }
 
+.speaker-controls-notes > .katex-html {
+  visibility: hidden;
+}
+
 /* --- Dark style --- */
 
 .dark {

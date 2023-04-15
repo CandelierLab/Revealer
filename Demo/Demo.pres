@@ -18,7 +18,6 @@
 > subtitle: Based on reveal.js
 
 === Principle
-> style: dark
 
 Slides are designed with text! <br> <br>
 
@@ -48,13 +47,16 @@ with the <code>Run on save</code> and <code>Live Server</code> plugins
 
 === The interface is highly controllable
 
-Try the key bindings! <br><br>
+<br>
+Try the key bindings! <br>
 
 * Slide navigation: Arrows
+* Pause: V
+* Slide overview: ESC
 * Zoom: Ctrl + Click
 * Full screen: F / ESC
 * Speaker's view: S
-* Slide overview: ESC
+* Chalkboard: C or B / Suppr
 
 --- This template is highly customisable
 
@@ -80,3 +82,10 @@ Caveat: only works with Chrome
 
 %%% Section slide
 > background: pink
+
+=== Equations
+
+This is a test for math: $x = 0$. Is it ok ?
+
+> notes:
+This is a test for math: $x = 0$. Is it ok ?

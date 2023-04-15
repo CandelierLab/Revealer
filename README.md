@@ -111,7 +111,7 @@ Revealer accepts html in the pres file, just like in standard reveal.js presenta
 | `>>> first:` *title* | **First slide**. The content of this slide is automatically generated. |
 | `===` *title* | **Horizontal slide**. |
 | `---` *title* | **Vertical slide**. |
-| `%%%` *section title* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. |
+| `%%%` *section title* | **New section slide**. Useful to mark the beginning of a new section in your presentation. The header is automatically removed. Add the `> relief: none` command to remove the text stroke. |
 | `>>> biblio` | **Bibliography slide(s)**. Automatically add slides with a formated bibliography based on the references defined by the `> cite:` command. The title of the slides can be modified with the `> title:` command. |
 
 #### Presentation settings
