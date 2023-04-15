@@ -184,8 +184,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-# if os.path.isdir(rdir):
-#   shutil.rmtree(rdir)
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
