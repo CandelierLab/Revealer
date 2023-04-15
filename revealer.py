@@ -456,7 +456,10 @@ for k, S in enumerate(slide):
       content += '<style>.reveal { margin-top: 0; }</style>'
 
       # Title
-      content += '<h1 class"relief">' + S['title']+ '</h1>'
+      if 'relief' in S['param'] and S['param']['relief']=='none':
+        content += '<h1>' + S['title']+ '</h1>'
+      else:
+        content += '<h1 class="relief">' + S['title']+ '</h1>'
 
     case 'biblio':
 

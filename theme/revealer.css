@@ -481,6 +481,15 @@ footer {
   font-style: italic;
 }
 
+h1.relief {
+  color: white;
+  text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;  
+}
+
 /* --- Dark style --- */
 
 .dark {
