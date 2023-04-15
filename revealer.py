@@ -184,8 +184,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-# if os.path.isdir(rdir):
-#   shutil.rmtree(rdir)
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
@@ -425,7 +425,7 @@ for k, S in enumerate(slide):
         content += '<style>.slide_{:d} #hlogos {{ display: flex; }}</style>'.format(k)
         
       # Title
-      content += '<h1><br>' + S['title']+ '</h1>'
+      content += '<h1>' + S['title']+ '</h1>'
 
       # Subtitle
       if 'subtitle' in S['param']:
@@ -451,6 +451,9 @@ for k, S in enumerate(slide):
 
       # Remove header
       S['param']['header'] = 'none'
+
+      # Reset margin
+      content += '<style>.reveal { margin-top: 0; }</style>'
 
       # Title
       content += '<h1 class"relief">' + S['title']+ '</h1>'

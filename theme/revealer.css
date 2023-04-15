@@ -366,6 +366,10 @@ code:not(.codeblock) {
  * REVEALER CUSTOMIZATION
  *********************************************/
 
+.reveal {
+  margin-top: 20px;
+}
+
 header {
   display: block;
   position: absolute !important;
@@ -488,3 +492,4 @@ footer {
   background: #1B262C;
   color: #edf6f9;
 }
+

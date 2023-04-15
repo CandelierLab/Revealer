@@ -134,6 +134,7 @@ These settings have to be defined before any slide is defined.
 | Command | Description |
 | --- | --- |
 | `> visibility: hidden` | **Hide slide**. |
+| `> style: dark` | **Dark styre**. Apply a dark theme on the current slide. |
 | `> subtitle:` *subtitle* | **Subtitle**. First slide subtitle. Has no effect outside of the first slide. |
 | `> header: none` | **Remove header**. Remove the fixed header on top of any slide. |
 | `> background: ` *path*/*color* | **Background**. Defines a background image or color for the current slide. |
