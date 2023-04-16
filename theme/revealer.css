@@ -366,10 +366,6 @@ code:not(.codeblock) {
  * REVEALER CUSTOMIZATION
  *********************************************/
 
-.reveal .slides {
-  margin-top: 30px;
-}
-
 header {
   display: block;
   position: absolute !important;
