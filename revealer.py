@@ -145,6 +145,7 @@ def contentify(html):
           blmode = True
 
         html += '<li>' + line[2:] + '</li>'
+        continue
 
       elif blmode:
         html += '</ul><br>'
@@ -152,7 +153,7 @@ def contentify(html):
 
       # --- Multiple columns
 
-      elif line == '||':
+      if line == '||':
         if colmode:
           html += '</div></div>'
         else:

@@ -2,7 +2,6 @@ Full demo
 
 * Font awesome
 * Bug math mode dans les notes (https://github.com/hakimel/reveal.js/issues/1726)
-* Bug liste: dans colonnes necessite ue nouvell eligne, pareil avec équations juste après
 
 - Fix pdf print
 - Fix webcam streaming
