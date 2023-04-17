@@ -72,6 +72,8 @@ class bibtex:
             entry['journal-short'] = 'PNAS'
           case 'Physical Review Letters':
             entry['journal-short'] = 'PRL'
+          case 'eLife':
+            entry['journal-short'] = entry['journal']
 
 
   def short_description(self, tag):
