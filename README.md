@@ -186,3 +186,11 @@ Bullet lists can be defined in any slide with the following syntax:
 ```
 
 The space after the `*` is mandatory.
+
+#### Highlighted block
+
+highlighted blocks can be defined with:
+
+```
+[ This is an important point. ]
+```

@@ -491,6 +491,15 @@ h1.relief {
   visibility: hidden;
 }
 
+.highlight {
+  display: block;
+  background-color: #eef;
+  border: 1px dotted gray;
+  padding: 0;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
 /* --- Dark style --- */
 
 .dark {

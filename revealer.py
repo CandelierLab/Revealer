@@ -159,12 +159,21 @@ def contentify(html):
         else:
           html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
         colmode = not colmode
+        continue
 
       elif colmode and line == '|':
         html += '</div><div class="column">'
+        continue
 
-      else:
-        html += line
+      # --- Highlighted block
+
+      if line.startswith('[ ') and line.endswith(' ]'):
+        html += '<div class="highlight">' + line[2:-2] + '</div>'
+        continue
+
+      # --- Default: add line
+
+      html += line
 
     if not line.startswith('<pre>'):
       html += '\n'
@@ -187,8 +196,8 @@ pdir = os.path.dirname(pfile)+'/'
 # Check existence
 rdir = pdir + 'reveal.js/'
 
-# if os.path.isdir(rdir):
-#   shutil.rmtree(rdir)
+if os.path.isdir(rdir):
+  shutil.rmtree(rdir)
 
 if not os.path.isdir(rdir):
 
