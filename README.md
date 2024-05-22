@@ -173,7 +173,17 @@ Third column
 ||
 ```
 
-It works with any number of columns.
+It works with any number of columns. The column width can also be adjusted:
+
+```
+|| 10%
+First column
+| 82%
+Second column
+||
+```
+
+NB: Since margins are 2%, the sum of the percentages should be 100-4*ncol.
 
 #### Bullet lists
 

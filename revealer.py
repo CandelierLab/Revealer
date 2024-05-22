@@ -153,16 +153,16 @@ def contentify(html):
 
       # --- Multiple columns
 
-      if line == '||':
+      if line.startswith('||'):
         if colmode:
           html += '</div></div>'
         else:
-          html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column">'
+          html += '<style>.multi-column{ display: flex; } .column{ flex: 1; }</style><div class="multi-column"><div class="column" style="flex: 0 0 ' + ('47%' if len(line)==2 else line[2:].strip()) + ';">'
         colmode = not colmode
         continue
 
-      elif colmode and line == '|':
-        html += '</div><div class="column">'
+      elif colmode and line.startswith('|'):
+        html += '</div><div class="column" style="flex: 0 0 ' + ('47%' if len(line)==1 else line[1:].strip()) + ';">'
         continue
 
       # --- Highlighted block
