@@ -400,6 +400,9 @@ for k, S in enumerate(slide):
       else:
         opt += ' data-background-image="{:s}"'.format(S['param']['background'])
 
+    if 'background-video' in S['param']:
+      opt += f" data-background-video='{S['param']['background-video']:s}' data-background-video-loop data-background-video-muted data-background-opacity=0.5 data-background-transition='none'"
+
     # Other parameters
     if 'attr' in S['param']:
       if isinstance(S['param']['attr'], list):
