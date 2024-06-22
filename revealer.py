@@ -401,7 +401,10 @@ for k, S in enumerate(slide):
         opt += ' data-background-image="{:s}"'.format(S['param']['background'])
 
     if 'background-video' in S['param']:
-      opt += f" data-background-video='{S['param']['background-video']:s}' data-background-video-loop data-background-video-muted data-background-opacity=0.5 data-background-transition='none'"
+
+      opacity = S['background-opacity'] if 'background-opacity' in S else 1
+
+      opt += f" data-background-video='{S['param']['background-video']:s}' data-background-video-loop data-background-video-muted data-background-opacity={opacity} data-background-transition='none'"
 
     # Other parameters
     if 'attr' in S['param']:
