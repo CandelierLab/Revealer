@@ -402,9 +402,9 @@ for k, S in enumerate(slide):
 
     if 'background-video' in S['param']:
 
-      opacity = S['background-opacity'] if 'background-opacity' in S else 1
+      opacity = S['param']['background-opacity'] if 'background-opacity' in S['param'] else '1'
 
-      opt += f" data-background-video='{S['param']['background-video']:s}' data-background-video-loop data-background-video-muted data-background-opacity={opacity} data-background-transition='none'"
+      opt += f" data-background-video='{S['param']['background-video']:s}' data-background-video-loop data-background-video-muted data-background-opacity={opacity:s} data-background-transition='none'"
 
     # Other parameters
     if 'attr' in S['param']:
