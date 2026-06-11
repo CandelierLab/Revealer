@@ -1,2 +1,13 @@
 reveal.js/
 Demo/Demo.html
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Sphinx documentation build
+Documentation/_build/

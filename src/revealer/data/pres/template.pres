@@ -1,0 +1,23 @@
+# --- SETTINGS --------------------------------------------------------------
+
+> author: Your name
+> event: Somewhere, 01/01/2026
+
+> theme: revealer
+> slideNumber: c/t
+
+# --- CONTENT ---------------------------------------------------------------
+
+>>> first: {title}
+> subtitle: A reveal.js presentation
+
+=== First slide
+
+Write your content in plain text and HTML.
+
+* Bullet one
+* Bullet two
+
+--- A vertical slide
+
+Press the down arrow to reach this slide.

@@ -89,3 +89,12 @@ This is a test for math: $x = 0$. Is it ok ?
 
 > notes:
 This is a test for math: $x = 0$. Is it ok ?
+
+=== Animated SVG
+> svg: Media/Animated/demo.svg
+> animate: #box fill:#0F4C75
+> animate: #dot opacity:1; fill:#c0392b @ 1s
+> animate: #arrow opacity:1 @ 300ms
+
+Reveal SVG elements step by step by referencing their <code>id</code>.
+

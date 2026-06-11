@@ -1,0 +1,14 @@
+/**
+ * Revealer default theme — neutral, sober (grey/black, discreet blue accent).
+ *
+ * The base stylesheet already ships neutral defaults, so this theme is a thin
+ * wrapper. Override `--rv-*` / `--r-*` variables below to tweak the palette.
+ */
+@import url(_revealer-base.css);
+
+:root {
+  --rv-h1-color: #1a1a1a;
+  --rv-h2-color: #555;
+  --r-link-color: #2a76dd;
+  --r-link-color-hover: #6ca0e8;
+}

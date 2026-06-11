@@ -1,0 +1,20 @@
+/**
+ * Laboratoire Jean Perrin (LJP) theme.
+ *
+ * Branded variant: dark-teal headings, blue sub-headings, matching links.
+ * Select it from a .pres file with:  > theme: ljp
+ */
+@import url(_revealer-base.css);
+
+:root {
+  --rv-h1-color: #1B262C;
+  --rv-h2-color: #0F4C75;
+  --rv-header-bg: #f0f0f0;
+  --rv-header-color: #1B262C;
+  --rv-header-border: 1px dashed grey;
+  --r-link-color: #0F4C75;
+  --r-link-color-dark: #0a3550;
+  --r-link-color-hover: #2a76dd;
+  --rv-dark-fixed-bg: #1B262C;
+  --rv-dark-color: #edf6f9;
+}

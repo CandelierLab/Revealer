@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <rect id="box" x="40" y="70" width="80" height="60" fill="#cccccc"/>
+  <circle id="dot" cx="200" cy="100" r="30" fill="#cccccc" opacity="0.3"/>
+  <path id="arrow" d="M250 100 L340 100 M320 85 L340 100 L320 115"
+        stroke="#888888" stroke-width="6" fill="none" opacity="0"/>
+</svg>

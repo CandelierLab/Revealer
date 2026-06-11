@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "revealer"
+version = "0.2.0"
+description = "An overlay of reveal.js to easily create scientific presentations."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Candelier Lab" }]
+keywords = ["reveal.js", "presentation", "slides", "science"]
+dependencies = [
+    "typer>=0.12",
+    "questionary>=2.0",
+    "rich>=13.0",
+    "tomli-w>=1.0",
+    "bibtexparser>=1.4,<2",
+]
+
+[project.urls]
+Homepage = "https://github.com/CandelierLab/Revealer"
+Documentation = "https://candelierlab.github.io/Revealer"
+
+[project.scripts]
+revealer = "revealer.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/revealer"]
+exclude = ["**/reveal.js", "**/*.pres.html", "**/*.pyc"]

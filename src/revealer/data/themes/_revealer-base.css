@@ -1,9 +1,12 @@
 /**
- * Revealer theme for reveal.js.
+ * Revealer base stylesheet (theme-agnostic).
  *
  * Adapted from the white theme by Hakim El Hattab, http://hakim.se
+ * Brand colours are exposed as `--rv-*` custom properties so individual
+ * themes only need to override a handful of variables (see revealer.css,
+ * ljp.css).
  */
-@import url(./fonts/source-sans-pro/source-sans-pro.css);
+
 section.has-dark-background, section.has-dark-background h1, section.has-dark-background h2, section.has-dark-background h3, section.has-dark-background h4, section.has-dark-background h5, section.has-dark-background h6 {
   color: #fff;
 }
@@ -12,13 +15,14 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
  * GLOBAL STYLES
  *********************************************/
 :root {
+  /* reveal.js core variables */
   --r-background-color: #fff;
-  --r-main-font: Source Sans Pro, Helvetica, sans-serif;
+  --r-main-font: Helvetica, Arial, "Segoe UI", sans-serif;
   --r-main-font-size: 42px;
   --r-main-color: #222;
   --r-block-margin: 20px;
   --r-heading-margin: 0 0 20px 0;
-  --r-heading-font: Source Sans Pro, Helvetica, sans-serif;
+  --r-heading-font: Helvetica, Arial, "Segoe UI", sans-serif;
   --r-heading-color: #222;
   --r-heading-line-height: 1.2;
   --r-heading-letter-spacing: normal;
@@ -36,6 +40,18 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   --r-link-color-hover: #6ca0e8;
   --r-selection-background-color: #98bdef;
   --r-selection-color: #fff;
+
+  /* Revealer branding variables (neutral defaults) */
+  --rv-h1-color: #1a1a1a;
+  --rv-h2-color: #555;
+  --rv-header-bg: #f5f5f5;
+  --rv-header-color: #222;
+  --rv-header-border: 1px dashed #bbb;
+  --rv-highlight-bg: #f0f0f5;
+  --rv-highlight-border: 1px dotted #aaa;
+  --rv-dark-bg: #111;
+  --rv-dark-fixed-bg: #1f1f1f;
+  --rv-dark-color: #f1f1f1;
 }
 
 .reveal-viewport {
@@ -116,7 +132,6 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   line-height: 1.3;
 }
 
-/* Remove trailing margins after titles */
 .reveal h1:last-child,
 .reveal h2:last-child,
 .reveal h3:last-child,
@@ -126,7 +141,6 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   margin-bottom: 0;
 }
 
-/* Ensure certain elements are never larger than the slide itself */
 .reveal img,
 .reveal video,
 .reveal iframe {
@@ -218,7 +232,7 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
 
 .reveal code {
   font-family: var(--r-code-font);
-  tab-size: 2;  
+  tab-size: 2;
 }
 
 .reveal pre code {
@@ -376,8 +390,9 @@ header {
   right: 0 !important;
   text-align: center !important;
 
-  background-color: #f0f0f0;
-  border-bottom: 1px dashed grey; 
+  background-color: var(--rv-header-bg);
+  color: var(--rv-header-color);
+  border-bottom: var(--rv-header-border);
   font-size: 6vh;
   padding: 10px 0;
   font-family: var(--r-heading-font);
@@ -395,8 +410,9 @@ footer {
   right: 0 !important;
   text-align: center !important;
 
-  background-color: #f0f0f0;
-  border-top: 1px dashed grey; 
+  background-color: var(--rv-header-bg);
+  color: var(--rv-header-color);
+  border-top: var(--rv-header-border);
   font-size: 2.5vh;
   padding: 2% 0;
   font-family: var(--r-heading-font);
@@ -404,7 +420,7 @@ footer {
 }
 
 .slide_header, .slide_footer {
-  display: none; 
+  display: none;
 }
 
 #hlogos {
@@ -419,8 +435,8 @@ footer {
   right: 0 !important;
   text-align: center !important;
 
-  background-color: #f0f0f0;
-  border-bottom: 1px dashed grey; 
+  background-color: var(--rv-header-bg);
+  border-bottom: var(--rv-header-border);
 }
 
 #hlogos img {
@@ -429,17 +445,17 @@ footer {
 }
 
 .reveal h1 {
-  color: #1B262C;
+  color: var(--rv-h1-color);
   font-size: 2em;
 }
 
 .reveal h2 {
-  color: #0F4C75;
+  color: var(--rv-h2-color);
   font-size: 1.5em;
 }
 
 #event {
-  margin: 20px 0 0 0; 
+  margin: 20px 0 0 0;
   color: grey;
 }
 
@@ -483,7 +499,7 @@ h1.relief {
     -2px -2px 0 #000,
     2px -2px 0 #000,
     -2px 2px 0 #000,
-    2px 2px 0 #000;  
+    2px 2px 0 #000;
 }
 
 .speaker-controls-notes > .katex-html {
@@ -492,22 +508,47 @@ h1.relief {
 
 .highlight {
   display: block;
-  background-color: #eef;
-  border: 1px dotted gray;
+  background-color: var(--rv-highlight-bg);
+  border: var(--rv-highlight-border);
   padding: 0;
   margin-left: 5%;
   margin-right: 5%;
 }
 
+/* --- SVG animation --- */
+
+.revealer-svg {
+  width: 100%;
+  margin: var(--r-block-margin) 0;
+}
+
+.revealer-svg svg {
+  max-width: 95%;
+  max-height: 70vh;
+}
+
+.revealer-svg svg * {
+  transition: all 0.5s ease;
+}
+
+/* Animation step markers carry no visual content. */
+.revealer-svg-anim {
+  display: none !important;
+}
+
+.svg-error {
+  color: #c00;
+  font-style: italic;
+}
+
 /* --- Dark style --- */
 
 .dark {
-  background: black;
-  color: #f1faee;
+  background: var(--rv-dark-bg);
+  color: var(--rv-dark-color);
 }
 
 .dark_fixed {
-  background: #1B262C;
-  color: #edf6f9;
+  background: var(--rv-dark-fixed-bg);
+  color: var(--rv-dark-color);
 }
-
