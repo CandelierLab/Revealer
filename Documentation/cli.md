@@ -4,6 +4,36 @@ The `revealer` command manages presentations and the reveal.js engine they
 embed. It is a hybrid CLI: explicit sub-commands, with interactive menus
 (extension selection, presentation picker) where it helps.
 
+## Interactive menu
+
+Running `revealer` with **no argument** opens a navigable menu giving access to
+every feature:
+
+```bash
+revealer
+```
+
+```
+Revealer — reveal.js scientific presentations
+
+? What would you like to do?
+ » Build a presentation
+   Create a new presentation
+   Manage extensions
+   Update the reveal.js engine
+   List presentations
+   Set or show the presentations root
+   Quit
+```
+
+Use the arrow keys to navigate and `Enter` to select; each entry runs the
+corresponding action (asking for any extra input, such as a presentation to
+pick or extensions to toggle) and then returns to the menu. Choose *Quit* (or
+press `Ctrl-C`) to leave.
+
+Every menu entry has an equivalent sub-command, documented below, for scripted
+or non-interactive use.
+
 ## Configuration
 
 Revealer stores a small global configuration in
