@@ -186,44 +186,44 @@ def generate_index_html(reveal_dir: str, extensions: list[str]) -> None:
             dependencies.append(spec["dependency"])
         needs_fa = needs_fa or spec.get("needs_fa", False)
 
-    if needs_fa:
-        css.append("fonts/fontawesome.min.css")
+        if needs_fa:
+                css.append("fonts/fontawesome.min.css")
 
-    css_html = "\n    ".join('<link rel="stylesheet" href="{0}">'.format(h) for h in css)
-    scripts_html = "\n    ".join('<script src="{0}"></script>'.format(s) for s in scripts)
+        css_html = "\n    ".join('<link rel="stylesheet" href="{0}">'.format(h) for h in css)
+        scripts_html = "\n    ".join('<script src="{0}"></script>'.format(s) for s in scripts)
 
-    plugins_html = "[ " + ", ".join(inits) + " ]"
-    deps_html = ""
-    if dependencies:
-        deps = ", ".join("{{ src: 'reveal.js/{0}' }}".format(d) for d in dependencies)
-        deps_html = "\n        dependencies: [{0}],".format(deps)
+        plugins_html = "[ " + ", ".join(inits) + " ]"
+        deps_html = ""
+        if dependencies:
+                deps = ", ".join("{{ src: 'reveal.js/{0}' }}".format(d) for d in dependencies)
+                deps_html = "\n        dependencies: [{0}],".format(deps)
 
-    html = """<!doctype html>
+        html = """<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>reveal.js</title>
+        <title>reveal.js</title>
 
-    {css}
-  </head>
-  <body>
-    <div class="reveal">
-      <div class="slides">
-      </div>
-    </div>
+        {css}
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+            </div>
+        </div>
 
-    {scripts}
+        {scripts}
 
-    <script>
-      Reveal.initialize({{
-        hash: true,
-        slideNumber: false,
-        plugins: {plugins},{deps}
-      }});
-    </script>
-  </body>
+        <script>
+            Reveal.initialize({{
+                hash: true,
+                slideNumber: false,
+                plugins: {plugins},__REVEAL_OPTIONS__{deps}
+            }});
+        </script>
+    </body>
 </html>
 """.format(css=css_html, scripts=scripts_html, plugins=plugins_html, deps=deps_html)
 

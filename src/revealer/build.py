@@ -363,6 +363,63 @@ def build(pfile: str) -> str:
     for old, new in rList:
         out = out.replace(old, new)
 
+    # --- Per-presentation reveal.js options ---------------------------------
+    # Collect settings that should be forwarded to Reveal.initialize().
+    def _to_js_literal(val):
+        if isinstance(val, bool):
+            return "true" if val else "false"
+        try:
+            # numeric?
+            if isinstance(val, (int, float)):
+                return str(val)
+            s = str(val).strip()
+            ls = s.lower()
+            if ls in ("true", "false", "null"):
+                return ls
+            # integer
+            if re.fullmatch(r"-?\d+", s):
+                return s
+            # float
+            if re.fullmatch(r"-?\d+\.\d+", s):
+                return s
+        except Exception:
+            pass
+        return "'" + s.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+    skip_keys = {
+        "title",
+        "theme",
+        "codeTheme",
+        "notesSize",
+        "svgDuration",
+        "maxRefsPerPage",
+        "bibtex",
+        "logo",
+        "author",
+        "event",
+        "slideNumber",
+    }
+
+    # Backwards-compatibility aliases for common option names in .pres files
+    alias_map = {
+        "progressbar": "progress",
+    }
+
+    opts = []
+    for k, v in setting.items():
+        if k in skip_keys:
+            continue
+        mapped_key = alias_map.get(k.lower(), k)
+        if isinstance(v, list):
+            js_items = ", ".join(_to_js_literal(x) for x in v)
+            jsval = f"[{js_items}]"
+        else:
+            jsval = _to_js_literal(v)
+        opts.append(f"{mapped_key}: {jsval}")
+
+    extra = "" if not opts else "\n        " + ",\n        ".join(opts) + "\n        "
+    out = out.replace("__REVEAL_OPTIONS__", extra)
+
     # --- Revealer javascript
 
     out = out.replace(

@@ -48,6 +48,8 @@ This slide is <b>extremely</b> informative.
 
 These must appear **before** the first slide.
 
+Any other global reveal.js options may also be specified here using `> option: value` (for example `> controls: false`). Boolean and numeric values are recognised; strings are quoted.
+
 | Command | Description |
 | --- | --- |
 | `> author:` *name* | **Author name.** Repeat to add contributors. |
@@ -56,6 +58,8 @@ These must appear **before** the first slide.
 | `> theme:` *name* | **Theme.** `revealer` (default, neutral), `ljp`, or any [reveal.js theme](https://revealjs.com/themes/). See [Themes](themes.md). |
 | `> codeTheme:` *name* | **Code highlighting theme.** See the [highlight.js demo](https://highlightjs.org/static/demo/). Default: `zenburn`. |
 | `> slideNumber:` *option* | **Slide numbers.** Disabled by default. Any [reveal.js value](https://revealjs.com/slide-numbers/). |
+| `> controls:` *true|false* | **Show navigation controls.** Defaults to reveal.js built-in value. |
+| `> progress:` *true|false* | **Progress bar.** Controls the visibility of the progress bar. Alias `progressbar` is accepted for backwards compatibility. |
 | `> notesSize:` *size* | **Speaker-notes font size.** Default: `1em`. Overridable per slide. |
 | `> svgDuration:` *time* | **Default SVG animation duration.** Default: `0.5s`. See [SVG animation](svg.md). |
 | `> bibtex:` *path* | **Bibtex file** used for the bibliography. |
