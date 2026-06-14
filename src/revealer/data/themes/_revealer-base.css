@@ -393,7 +393,7 @@ header {
   background-color: var(--rv-header-bg);
   color: var(--rv-header-color);
   border-bottom: var(--rv-header-border);
-  font-size: 6vh;
+  font-size: 5vh;
   padding: 10px 0;
   font-family: var(--r-heading-font);
   font-weight: var(--r-heading-font-weight);
@@ -560,8 +560,10 @@ h1.relief {
 }
 
 .revealer-svg svg {
-  max-width: 95%;
-  max-height: 70vh;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100vh;
 }
 
 .revealer-svg svg * {
