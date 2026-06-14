@@ -15,7 +15,8 @@ inside VS Code.
 
 installation
 cli
-pres-syntax
+pres-structure
+pres-shortcuts
 themes
 svg
 bibliography
@@ -29,3 +30,13 @@ revealer root ~/Presentations  # remember where presentations live
 revealer new MyTalk            # scaffold a new presentation
 revealer build MyTalk          # generate the HTML
 ```
+
+## Live demo
+
+Below is an embedded, navigable demo presentation shipped with Revealer.
+If your documentation is served alongside the repository, the iframe will
+load the packaged demo. Use the arrow keys to navigate.
+
+<div style="border:1px solid #ccc; padding:8px;">
+	<iframe src="../Demo/Demo.html" width="100%" height="480" title="Revealer demo"></iframe>
+</div>

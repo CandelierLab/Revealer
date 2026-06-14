@@ -3,3 +3,6 @@
 Fix: 
 - background + headers
 - backgroundTransition: false
+
+Ajouter les blocs photo ?
+Ajouter les tables ?
