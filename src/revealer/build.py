@@ -123,8 +123,28 @@ def contentify(html: str) -> str:
     lines = html.strip().split("\n")
     html = ""
     codemode = False
-    blmode = False
     colmode = False
+
+    # Stack to manage nested unordered lists: one entry per open <ul>
+    ul_stack: list[int] = []
+    li_open: list[bool] = []
+    list_style_injected = False
+
+    def _inject_list_styles():
+        # Generate CSS rules for several nesting levels. Styles: changing
+        # list marker and slightly decreasing font-size per level.
+        markers = ["disc", "circle", "square", "decimal", "lower-alpha", "lower-roman"]
+        rules = ["<style> .rv-list { margin: 0 0 0 1em; padding-left: 1em; }"]
+        for lvl in range(1, 11):
+            marker = markers[(lvl - 1) % len(markers)]
+            size = max(0.7, 1.0 - 0.06 * (lvl - 1))
+            rules.append(
+                ".rv-list.lvl-{lvl} li {{ list-style-type: {marker}; font-size: {size}em; margin: 0.2em 0; }}".format(
+                    lvl=lvl, marker=marker, size=("{:.2f}".format(size))
+                )
+            )
+        rules.append("</style>")
+        return "".join(rules)
 
     for line in lines:
 
@@ -148,15 +168,61 @@ def contentify(html: str) -> str:
 
             # --- Bullet lists
 
-            if line.startswith("*"):
-                if not blmode:
-                    html += "<ul>"
-                    blmode = True
-                html += "<li>" + line[2:] + "</li>"
+            # --- Bullet lists (supports arbitrary nesting via leading spaces)
+
+            m = re.match(r"^(\s*)\*\s(.*)", line)
+            if m:
+                indent, text = m.group(1), m.group(2)
+                # Define level: 0 spaces -> level 1; 2 spaces -> level 2; etc.
+                level = max(1, (len(indent) // 2) + 1)
+
+                # Inject styles once when first encountering lists
+                if not list_style_injected:
+                    html += _inject_list_styles()
+                    list_style_injected = True
+
+                # Current open level
+                cur = len(ul_stack)
+
+                if level > cur:
+                    # Open new nested uls
+                    for L in range(cur + 1, level + 1):
+                        html += '<ul class="rv-list lvl-{0}">'.format(L)
+                        ul_stack.append(L)
+                        li_open.append(False)
+                    # Open li for this item
+                    html += "<li>" + text
+                    li_open[-1] = True
+                elif level == cur and cur > 0:
+                    # Close previous li at this level then open new li
+                    if li_open[-1]:
+                        html += "</li>"
+                        li_open[-1] = False
+                    html += "<li>" + text
+                    li_open[-1] = True
+                else:  # level < cur
+                    # Close deeper levels
+                    while len(ul_stack) > level:
+                        if li_open and li_open[-1]:
+                            html += "</li>"
+                            li_open[-1] = False
+                        html += "</ul>"
+                        ul_stack.pop()
+                        li_open.pop()
+                    # Now at desired level: close previous li and open new one
+                    if li_open and li_open[-1]:
+                        html += "</li>"
+                        li_open[-1] = False
+                    if li_open:
+                        html += "<li>" + text
+                        li_open[-1] = True
+                    else:
+                        # No ul open at all (level == 0), open a top-level ul
+                        html += '<ul class="rv-list lvl-1">'
+                        ul_stack.append(1)
+                        li_open.append(True)
+                        html += "<li>" + text
                 continue
-            elif blmode:
-                html += "</ul><br>"
-                blmode = False
 
             # --- Multiple columns
 
@@ -195,8 +261,17 @@ def contentify(html: str) -> str:
 
     if codemode:
         html += "</code></pre>"
-    if blmode:
-        html += "</ul><br>"
+    # Close any open list items and uls
+    while ul_stack:
+        if li_open and li_open[-1]:
+            html += "</li>"
+            li_open[-1] = False
+        html += "</ul>"
+        ul_stack.pop()
+        li_open.pop()
+    if len(ul_stack) == 0 and list_style_injected:
+        # preserve previous behaviour: add a break after lists
+        html += "<br>"
     if colmode:
         html += "</div></div>"
 
