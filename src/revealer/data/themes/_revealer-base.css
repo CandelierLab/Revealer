@@ -423,6 +423,43 @@ footer {
   display: none;
 }
 
+/*********************************************
+ * SLIDE CONTENT LAYOUT
+ *
+ * Every slide's visible body is wrapped in
+ * `.rv-content > .rv-content-inner`. The runtime (revealer.js) positions
+ * `.rv-content` in the area left free by the fixed header/footer (with a
+ * light margin on the four edges) and rescales `.rv-content-inner` so the
+ * whole body always fits without overflowing or overlapping the header.
+ *********************************************/
+.reveal .slides > section,
+.reveal .slides > section > section {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reveal .slides section > .rv-content {
+  position: absolute;
+  box-sizing: border-box;
+  /* left / top / width / height are set by the runtime; these are fallbacks */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.reveal .slides section > .rv-content > .rv-content-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
 #hlogos {
   display: none;
   justify-content: space-between;

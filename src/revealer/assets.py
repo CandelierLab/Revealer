@@ -220,6 +220,7 @@ def generate_index_html(reveal_dir: str, extensions: list[str]) -> None:
             Reveal.initialize({{
                 hash: true,
                 slideNumber: false,
+                center: false,
                 plugins: {plugins},__REVEAL_OPTIONS__{deps}
             }});
         </script>

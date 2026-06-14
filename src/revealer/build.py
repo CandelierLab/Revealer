@@ -316,6 +316,14 @@ def build(pfile: str) -> str:
                         target[key].append(value)
                     else:
                         target[key] = value
+                    # If this is an inline svg directive inside a slide,
+                    # insert a placeholder into the slide HTML so that the
+                    # SVG can be emitted exactly where the directive appears
+                    # in the source .pres file.
+                    if key == "svg" and len(slide):
+                        placeholder = "__REVEALER_SVG__"
+                        slide[-1]["html"] += placeholder + "\n"
+                        target["_svg_placeholder"] = placeholder
 
             # --- Slide content
 
@@ -479,6 +487,8 @@ def build(pfile: str) -> str:
 
         # --- Slide specialization
 
+        body = ""
+
         match S["type"]:
 
             case "first":
@@ -492,25 +502,24 @@ def build(pfile: str) -> str:
                     headers += "</div>"
                     content += '<style>.slide_{:d} #hlogos {{ display: flex; }}</style>'.format(k)
 
-                content += "<h1>" + S["title"] + "</h1>"
+                body += "<h1>" + S["title"] + "</h1>"
                 if "subtitle" in S["param"]:
-                    content += "<h2>" + S["param"]["subtitle"] + "</h2>"
-                content += "<br>"
+                    body += "<h2>" + S["param"]["subtitle"] + "</h2>"
+                body += "<br>"
 
                 if "author" in setting:
                     authors = setting["author"] if isinstance(setting["author"], list) else [setting["author"]]
-                    content += ", ".join(authors)
+                    body += ", ".join(authors)
 
                 if "event" in setting:
-                    content += '<div id="event">' + setting["event"] + "</div>"
+                    body += '<div id="event">' + setting["event"] + "</div>"
 
             case "section":
                 S["param"]["header"] = "none"
-                content += "<style>.reveal .slides { margin-top: 0; }</style>"
                 if S["param"].get("relief") == "none":
-                    content += "<h1>" + S["title"] + "</h1>"
+                    body += "<h1>" + S["title"] + "</h1>"
                 else:
-                    content += '<h1 class="relief">' + S["title"] + "</h1>"
+                    body += '<h1 class="relief">' + S["title"] + "</h1>"
 
             case "biblio":
                 if biblio is not None:
@@ -524,8 +533,10 @@ def build(pfile: str) -> str:
                             content += '<div class="slide_header">{:s}</div>'.format(title)
                         else:
                             content += '<div class="slide_header">{:s} - {:d}/{:d}</div>'.format(title, i + 1, npages)
+                        content += '<div class="rv-content"><div class="rv-content-inner">'
                         for j in range(sindex, min(sindex + setting["maxRefsPerPage"], len(biblio.item_num))):
                             content += '<div class="biblio-long">' + biblio.long_description(biblio.item_num[j]["ID"]) + "</div>"
+                        content += "</div></div>"
                         sindex += setting["maxRefsPerPage"]
                         content += "</section>"
                     content += "</section>"
@@ -543,16 +554,26 @@ def build(pfile: str) -> str:
 
         # --- Content ---------------------------------------------------------
 
-        html = svg_html + contentify(S["html"])
+        # If a placeholder was inserted when parsing `> svg:`, respect its
+        # position in the slide HTML. Otherwise keep legacy behaviour and
+        # prefix the SVG before the slide content.
+        placeholder = S["param"].get("_svg_placeholder") if "param" in S else None
+        if placeholder and placeholder in S["html"]:
+            body += contentify(S["html"]).replace(placeholder, svg_html)
+        else:
+            body += svg_html + contentify(S["html"])
 
+        # --- Speaker notes (kept as a direct child of <section>) -------------
+
+        notes_html = ""
         if len(S["notes"]):
             nS = S["param"].get("notes", setting["notesSize"])
-            html += (
+            notes_html = (
                 '<aside class="notes"><style>.speaker-controls-notes {font-size: '
                 + nS
                 + ";} .speaker-controls-notes ul {margin: 0px; padding-left: 10px;}</style>"
             )
-            html += contentify(S["notes"]) + "</aside>"
+            notes_html += contentify(S["notes"]) + "</aside>"
 
         # --- Bibliography citations
 
@@ -565,21 +586,24 @@ def build(pfile: str) -> str:
                 biblio.add_entry(tag)
                 sd += '<div class="biblio-short">' + biblio.short_description(tag) + "</div>"
 
-            for m in reversed(list(re.finditer("<ref:([^>]*)>", html))):
+            for m in reversed(list(re.finditer("<ref:([^>]*)>", body))):
                 try:
                     rhtml = "<sup>" + ",".join(
                         str(biblio.item_tag[tag.strip()]["revealer-number"])
                         for tag in m.group(1).split(",")
                     ) + "</sup>"
                     s = m.span()
-                    html = html[0:s[0]] + rhtml + html[s[1]:]
+                    body = body[0:s[0]] + rhtml + body[s[1]:]
                 except KeyError:
                     pass
 
             content += '<div class="slide_footer">{:s}</div>'.format(sd)
             content += "<style>.slide_{:d} footer {{ display: block; }}</style>".format(k)
 
-        content += html + "\n</section>"
+        # The visible body is wrapped so the runtime can center it inside the
+        # area left by the header/footer and rescale it to always fit.
+        content += '<div class="rv-content"><div class="rv-content-inner">' + body + "</div></div>"
+        content += notes_html + "\n</section>"
 
         if S["type"] == "lastchild":
             content += "</section>"
