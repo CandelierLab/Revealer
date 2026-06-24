@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="220" viewBox="0 0 760 220" role="img" aria-label="Rendered highlighted block snapshot">
+  <rect width="760" height="220" fill="#ffffff"/>
+  <rect x="92" y="58" width="576" height="104" rx="4" fill="#f0f0f5" stroke="#aaa" stroke-dasharray="4 4"/>
+  <text x="132" y="122" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#222">This is an important point.</text>
+</svg>

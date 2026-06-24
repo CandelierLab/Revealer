@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="280" viewBox="0 0 760 280" role="img" aria-label="Rendered inline SVG animation snapshot">
+  <rect width="760" height="280" fill="#ffffff"/>
+  <rect x="100" y="96" width="126" height="88" rx="5" fill="#0F4C75"/>
+  <circle cx="380" cy="140" r="44" fill="#c0392b"/>
+  <path d="M492 140 H630 M600 114 L630 140 L600 166" stroke="#555" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="100" y="232" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#333">Each fragment updates selected SVG elements.</text>
+</svg>

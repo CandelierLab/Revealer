@@ -19,9 +19,13 @@ source_suffix = {
 }
 
 templates_path = []
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "pres-syntax.md"]
 
 # -- HTML output -------------------------------------------------------------
 
 html_theme = "furo"
 html_title = "Revealer"
+html_static_path = ["_static"]
+html_extra_path = ["../Demo"]
+html_css_files = ["revealer-docs.css"]
+html_js_files = ["revealer-docs.js"]

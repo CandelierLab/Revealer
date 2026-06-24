@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-label="Rendered columns snapshot">
+  <rect width="760" height="300" fill="#ffffff"/>
+  <rect x="48" y="36" width="304" height="228" rx="4" fill="#f7f7f7" stroke="#d0d0d0"/>
+  <rect x="408" y="36" width="304" height="228" rx="4" fill="#f7f7f7" stroke="#d0d0d0"/>
+  <text x="84" y="92" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="600" fill="#222">Column A</text>
+  <text x="84" y="146" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#222">• Velocity rule</text>
+  <text x="84" y="188" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#222">• Orientation rule</text>
+  <text x="444" y="92" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="600" fill="#222">Column B</text>
+  <text x="444" y="146" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#222">• Discrete state</text>
+  <text x="444" y="188" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#222">• Grid update</text>
+</svg>

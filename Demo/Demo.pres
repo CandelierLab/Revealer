@@ -64,6 +64,46 @@ Try the key bindings! <br>
 * Include your own logos
 * Develop your own features
 
+--- Two columns slides
+||
+<h3>Continuous case</h3>
+<p>Positions & angles are real values</p>
+* Velocity rule
+* Orientation rule
+|
+<h3>Discrete case</h3>
+<p>Sitting on squares, 4 orientations</p>
+* Velocity rule
+* Orientation rule
+||
+
+--- Table slides
+> table(2,3)
+> margin: 2rem
+> border: true
+
+> cell: #f5f5f5
+<h3>Cell A</h3>
+Centered text
+
+> cell
+* Item 1
+* Item 2
+
+> cell: #eaf3ff
+$E = mc^2$
+
+> row
+Bottom left
+
+> cell: #fff3cd
+Bottom center
+
+> cell
+Bottom right
+
+> end: table
+
 --- Export to pdf
 > visibility: hidden
 

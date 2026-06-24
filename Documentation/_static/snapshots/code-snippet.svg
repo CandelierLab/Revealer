@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="260" viewBox="0 0 760 260" role="img" aria-label="Rendered code block snapshot">
+  <rect width="760" height="260" fill="#ffffff"/>
+  <rect x="32" y="28" width="696" height="204" rx="6" fill="#1f1f1f"/>
+  <text x="58" y="76" font-family="monospace" font-size="28" fill="#f8f8f2">print('Hello')</text>
+  <text x="58" y="122" font-family="monospace" font-size="28" fill="#a6e22e">for value in range(3):</text>
+  <text x="94" y="168" font-family="monospace" font-size="28" fill="#66d9ef">show(value)</text>
+</svg>

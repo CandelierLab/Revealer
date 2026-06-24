@@ -1,0 +1,23 @@
+# --- SETTINGS--------------------------------------------------------------
+
+> author: First author
+> event: Anywhere, 01/01/4321
+> slideNumber: c/t
+
+# --- CONTENT---------------------------------------------------------------
+
+>>> first: Simple Revealer demo
+> subtitle: A tiny `.pres` file
+
+=== First slide
+
+A slide can be just a title and a few lines of HTML. <br>
+
+* Write text
+* Add bullets
+* Save and build
+
+--- A vertical sub-slide
+
+Use <code>---</code> to create a slide below the previous one. <br>
+Navigate with the up and down arrows.

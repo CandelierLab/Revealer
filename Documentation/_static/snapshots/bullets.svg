@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-label="Rendered nested bullet list snapshot">
+  <rect width="760" height="300" fill="#ffffff"/>
+  <text x="110" y="78" font-family="Helvetica, Arial, sans-serif" font-size="30" fill="#222">• Main point</text>
+  <text x="156" y="128" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#222">◦ Supporting detail</text>
+  <text x="156" y="174" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#222">◦ Second detail</text>
+  <text x="202" y="218" font-family="Helvetica, Arial, sans-serif" font-size="22" fill="#222">▪ Fine detail</text>
+</svg>

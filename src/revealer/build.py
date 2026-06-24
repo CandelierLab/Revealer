@@ -146,7 +146,123 @@ def contentify(html: str) -> str:
         rules.append("</style>")
         return "".join(rules)
 
-    for line in lines:
+    def _close_lists():
+        nonlocal html
+        while ul_stack:
+            if li_open and li_open[-1]:
+                html += "</li>"
+                li_open[-1] = False
+            html += "</ul>"
+            ul_stack.pop()
+            li_open.pop()
+
+    def _escape_style_value(value: str) -> str:
+        return value.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+
+    def _is_truthy(value: str) -> bool:
+        return value.strip().lower() in {"true", "yes", "1", "on"}
+
+    def _parse_table(start_index: int):
+        start = re.match(r"^>\s*table\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$", lines[start_index])
+        row_count, column_count = int(start.group(1)), int(start.group(2))
+        margin = "0"
+        border = False
+        cells = []
+        current_cell = None
+        current_row = 1
+        current_column = 0
+        index = start_index + 1
+
+        def start_cell(background: str | None, new_row: bool = False):
+            nonlocal current_cell, current_row, current_column
+            if new_row:
+                current_row += 1
+                current_column = 1
+            else:
+                current_column += 1
+                if current_column > column_count:
+                    current_row += 1
+                    current_column = 1
+            current_cell = {
+                "row": current_row,
+                "column": current_column,
+                "background": background or "transparent",
+                "content": [],
+            }
+            cells.append(current_cell)
+
+        while index < len(lines):
+            line = lines[index]
+            if re.match(r"^>\s*end\s*:\s*table\s*$", line):
+                index += 1
+                break
+
+            option = re.match(r"^>\s*(margin|border)\s*:\s*(.*?)\s*$", line)
+            if option:
+                key, value = option.group(1), option.group(2)
+                if key == "margin":
+                    margin = value or "0"
+                else:
+                    border = _is_truthy(value)
+                index += 1
+                continue
+
+            cell = re.match(r"^>\s*cell(?:\s*:\s*(.*?))?\s*$", line)
+            if cell:
+                start_cell(cell.group(1))
+                index += 1
+                continue
+
+            row = re.match(r"^>\s*row(?:\s*:\s*(.*?))?\s*$", line)
+            if row:
+                start_cell(row.group(1), new_row=True)
+                index += 1
+                continue
+
+            if current_cell is None and not line.strip():
+                index += 1
+                continue
+            if current_cell is None:
+                start_cell(None)
+            current_cell["content"].append(line)
+            index += 1
+
+        table_classes = "rv-table bordered" if border else "rv-table"
+        out = (
+            "<style>"
+            ".rv-content-inner:has(> .rv-table-wrap){{height:100%;}}"
+            ".rv-table-wrap{{box-sizing:border-box;width:100%;height:100%;min-height:60vh;}}"
+            ".rv-table{{display:grid;width:100%;height:100%;box-sizing:border-box;}}"
+            ".rv-table-cell{{display:flex;align-items:center;justify-content:center;text-align:center;"
+            "box-sizing:border-box;padding:.25em;overflow:hidden;}}"
+            ".rv-table.bordered .rv-table-cell{{border:1px solid #444;}}"
+            "</style>"
+            '<div class="rv-table-wrap" style="padding:{margin};">'
+            '<div class="{table_classes}" style="grid-template-columns:repeat({cols},minmax(0,1fr));'
+            'grid-template-rows:repeat({rows},minmax(0,1fr));">'
+        ).format(
+            margin=_escape_style_value(margin),
+            table_classes=table_classes,
+            cols=column_count,
+            rows=row_count,
+        )
+        for cell in cells:
+            style = (
+                "grid-row:{row};grid-column:{column};background:{background};"
+            ).format(
+                row=cell["row"],
+                column=cell["column"],
+                background=_escape_style_value(cell["background"]),
+            )
+            out += '<div class="rv-table-cell" style="{style}"><div>'.format(style=style)
+            out += contentify("\n".join(cell["content"])) if cell["content"] else ""
+            out += "</div></div>"
+        out += "</div></div>"
+        return out, index
+
+    index = 0
+    while index < len(lines):
+        line = lines[index]
 
         # --- Code snippets
 
@@ -155,16 +271,31 @@ def contentify(html: str) -> str:
                 html += "</code></pre>"
                 codemode = False
             else:
+                _close_lists()
                 html += '<pre><code class="codeblock"{:s}>'.format(
                     " " + line[2:].strip() if len(line) > 2 else ""
                 )
                 codemode = True
+            index += 1
             continue
 
         if codemode:
             html += line
 
         else:
+
+            # --- Table blocks
+
+            if re.match(r"^>\s*table\(\s*\d+\s*,\s*\d+\s*\)\s*$", line):
+                _close_lists()
+                table_html, index = _parse_table(index)
+                html += table_html
+                continue
+
+            if re.match(r"^>\s*end\s*:\s*\w+\s*$", line):
+                _close_lists()
+                index += 1
+                continue
 
             # --- Bullet lists
 
@@ -222,11 +353,13 @@ def contentify(html: str) -> str:
                         ul_stack.append(1)
                         li_open.append(True)
                         html += "<li>" + text
+                index += 1
                 continue
 
             # --- Multiple columns
 
             if line.startswith("||"):
+                _close_lists()
                 if colmode:
                     html += "</div></div>"
                 else:
@@ -237,17 +370,23 @@ def contentify(html: str) -> str:
                         + ';">'
                     )
                 colmode = not colmode
+                index += 1
                 continue
             elif colmode and line.startswith("|"):
+                _close_lists()
                 html += '</div><div class="column" style="flex: 0 0 ' + (
                     "47%" if len(line) == 1 else line[1:].strip()
                 ) + ';">'
+                index += 1
                 continue
+
+            _close_lists()
 
             # --- Highlighted block
 
             if line.startswith("[ ") and line.endswith(" ]"):
                 html += '<div class="highlight">' + line[2:-2] + "</div>"
+                index += 1
                 continue
 
             # --- Default: add line
@@ -256,19 +395,14 @@ def contentify(html: str) -> str:
 
         if not line.startswith("<pre>"):
             html += "\n"
+        index += 1
 
     # --- Close any block left open at the end of the slide
 
     if codemode:
         html += "</code></pre>"
     # Close any open list items and uls
-    while ul_stack:
-        if li_open and li_open[-1]:
-            html += "</li>"
-            li_open[-1] = False
-        html += "</ul>"
-        ul_stack.pop()
-        li_open.pop()
+    _close_lists()
     if len(ul_stack) == 0 and list_style_injected:
         # preserve previous behaviour: add a break after lists
         html += "<br>"
@@ -328,6 +462,7 @@ def build(pfile: str) -> str:
     setting = {}
     slide = []
     notes = False
+    table_mode = False
 
     with open(pfile, "r") as fid:
         for line in fid:
@@ -339,18 +474,21 @@ def build(pfile: str) -> str:
             if line.startswith(s):
                 slide.append({"type": "first", "title": line[len(s):].strip(), "html": "", "notes": "", "param": {}})
                 notes = False
+                table_mode = False
                 continue
 
             s = r"%%% "
             if line.startswith(s):
                 slide.append({"type": "section", "title": line[len(s):].strip(), "html": "", "notes": "", "param": {}})
                 notes = False
+                table_mode = False
                 continue
 
             s = "=== "
             if line.startswith(s):
                 slide.append({"type": "slide", "title": line[len(s):].strip(), "html": "", "notes": "", "param": {}})
                 notes = False
+                table_mode = False
                 continue
 
             s = "--- "
@@ -362,17 +500,33 @@ def build(pfile: str) -> str:
                         slide[-1]["type"] = "parent"
                 slide.append({"type": "lastchild", "title": line[len(s):].strip(), "html": "", "notes": "", "param": {}})
                 notes = False
+                table_mode = False
                 continue
 
             s = ">>> biblio"
             if line.startswith(s):
                 slide.append({"type": "biblio", "title": "Bibliography", "html": "", "notes": "", "param": {}})
                 notes = False
+                table_mode = False
                 continue
 
             # --- Settings
 
             if line.startswith(">"):
+
+                table_start = re.match(r"^>\s*table\(\s*\d+\s*,\s*\d+\s*\)\s*$", line)
+                table_end = re.match(r"^>\s*end\s*:\s*table\s*$", line)
+                if len(slide) and not notes and (table_mode or table_start):
+                    slide[-1]["html"] += line
+                    if table_start:
+                        table_mode = True
+                    if table_end:
+                        table_mode = False
+                    continue
+
+                if len(slide) and not notes and re.match(r"^>\s*end\s*:\s*\w+\s*$", line):
+                    slide[-1]["html"] += line
+                    continue
 
                 if line.startswith("> notes:"):
                     notes = True

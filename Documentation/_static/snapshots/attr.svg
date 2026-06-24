@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="260" viewBox="0 0 760 260" role="img" aria-label="Rendered reveal.js attributes snapshot">
+  <rect width="760" height="260" fill="#ffffff"/>
+  <rect x="80" y="48" width="600" height="164" rx="4" fill="#f7fbff" stroke="#86a9c8"/>
+  <text x="116" y="112" font-family="Helvetica, Arial, sans-serif" font-size="28" fill="#222">Slide with reveal.js attributes</text>
+  <text x="116" y="160" font-family="Helvetica, Arial, sans-serif" font-size="21" fill="#445">data-auto-animate, data-background-opacity, ...</text>
+</svg>

@@ -74,9 +74,8 @@ Any other global reveal.js options may also be specified here using `> option: v
 | `> header: none` | **Remove the fixed header.** |
 | `> background:` *path*/*color* | **Background** image or colour. |
 | `> color:` *color* | **Text colour** for the current slide. |
-| `> cite:` *refID* | **Citation.** Cites a reference from the `.bib` file. A short note appears at the bottom of the slide; markers can be placed with `<ref:refID1,refID2>`. The full entry is added to the bibliography slide. |
-| `> notes:` *size* | **Speaker notes.** Everything after this line is shown in the speaker view only. The optional *size* sets the notes font size. |
-| `> attr:` *attributes* | **Raw attributes** appended to the `<section>` tag (useful for reveal.js attributes). |
-| `> svg:` *path* | **Inline SVG.** See [SVG animation](svg.md). |
-| `> animate:` *spec* | **SVG animation step.** Repeatable. See [SVG animation](svg.md). |
+
+Content-level helpers such as citations, speaker notes, raw reveal.js
+attributes, inline SVGs, and SVG animation steps are documented in
+[Content shortcuts](pres-shortcuts.md).
 
