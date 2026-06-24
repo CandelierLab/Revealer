@@ -28,6 +28,31 @@ jobs:
       - name: Install documentation dependencies
         run: pip install -r Documentation/requirements.txt
 
+      - name: Install Revealer
+        run: pip install .
+
+      - name: Build demo presentations
+        run: |
+          # Run from a neutral directory so the root-level ``revealer.py`` shim
+          # does not shadow the installed ``revealer`` package.
+          cd "$RUNNER_TEMP"
+          python - <<'PY'
+          import os
+
+          from revealer import assets
+          from revealer.build import build
+
+          repo = os.environ["GITHUB_WORKSPACE"]
+          demo = os.path.join(repo, "Demo")
+
+          # reveal.js and the generated *.html demos are git-ignored, so they
+          # must be (re)generated here before Sphinx copies ../Demo verbatim.
+          extensions = assets.read_presentation_extensions(demo)
+          assets.setup_revealjs(demo, extensions)
+          build(os.path.join(demo, "Demo.pres"))
+          build(os.path.join(demo, "Simple.pres"))
+          PY
+
       - name: Build HTML documentation
         run: sphinx-build -b html Documentation Documentation/_build/html
 
