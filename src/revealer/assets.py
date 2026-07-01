@@ -189,7 +189,11 @@ def generate_index_html(reveal_dir: str, extensions: list[str]) -> None:
         if needs_fa:
                 css.append("fonts/fontawesome.min.css")
 
-        css_html = "\n    ".join('<link rel="stylesheet" href="{0}">'.format(h) for h in css)
+        css_links = []
+        for h in css:
+            attrs = ' id="rv-theme"' if h == 'dist/theme/__THEME__.css' else ''
+            css_links.append('<link rel="stylesheet"{0} href="{1}">'.format(attrs, h))
+        css_html = "\n    ".join(css_links)
         scripts_html = "\n    ".join('<script src="{0}"></script>'.format(s) for s in scripts)
 
         plugins_html = "[ " + ", ".join(inits) + " ]"

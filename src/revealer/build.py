@@ -23,6 +23,110 @@ from pathlib import Path
 from . import assets
 
 
+class _SimpleBibBase:
+    def __init__(self, entries):
+        self.entries = entries
+
+
+def _strip_bib_value(value: str) -> str:
+    value = value.strip().rstrip(",").strip()
+    while len(value) >= 2 and ((value[0] == "{" and value[-1] == "}") or (value[0] == '"' and value[-1] == '"')):
+        value = value[1:-1].strip()
+    return value.replace("\n", " ")
+
+
+def _parse_bib_fields(body: str) -> dict[str, str]:
+    fields = {}
+    chunks = []
+    start = 0
+    depth = 0
+    quote = False
+    for index, char in enumerate(body):
+        if char == '"' and (index == 0 or body[index - 1] != "\\"):
+            quote = not quote
+        elif not quote:
+            if char == "{":
+                depth += 1
+            elif char == "}" and depth:
+                depth -= 1
+            elif char == "," and depth == 0:
+                chunks.append(body[start:index])
+                start = index + 1
+    chunks.append(body[start:])
+
+    for chunk in chunks:
+        match = re.match(r"\s*([A-Za-z][\w-]*)\s*=\s*(.*)\s*$", chunk, re.DOTALL)
+        if match:
+            fields[match.group(1).lower()] = _strip_bib_value(match.group(2))
+    return fields
+
+
+def _parse_bibtex_fallback(text: str):
+    entries = []
+    pos = 0
+    while True:
+        at = text.find("@", pos)
+        if at == -1:
+            break
+        brace = text.find("{", at)
+        if brace == -1:
+            break
+        comma = text.find(",", brace)
+        if comma == -1:
+            break
+
+        key = text[brace + 1:comma].strip()
+        depth = 1
+        end = comma + 1
+        while end < len(text) and depth:
+            if text[end] == "{":
+                depth += 1
+            elif text[end] == "}":
+                depth -= 1
+            end += 1
+
+        entry = _parse_bib_fields(text[comma + 1:end - 1])
+        if key:
+            entry["ID"] = key
+            entries.append(entry)
+        pos = end
+    return _SimpleBibBase(entries)
+
+
+def _append_setting(target: dict, key: str, value: str) -> None:
+    if key in target:
+        if not isinstance(target[key], list):
+            target[key] = [target[key]]
+        target[key].append(value)
+    else:
+        target[key] = value
+
+
+def _strip_tags(value: str) -> str:
+    return re.sub(r"<[^>]*>", "", value)
+
+
+def _initials(value: str) -> str:
+    words = re.findall(r"\b\w", _strip_tags(value), flags=re.UNICODE)
+    return "".join(words[:2]).upper()
+
+
+def _format_bib_author_short(author: str) -> str:
+    author = " ".join(author.replace("\n", " ").split())
+    if not author:
+        return ""
+
+    if "," in author:
+        family, given = [part.strip() for part in author.split(",", 1)]
+    else:
+        parts = author.split(" ")
+        family = parts[-1]
+        given = " ".join(parts[:-1])
+
+    initials = "".join(part[0] + ". " for part in re.findall(r"\b\w+", given, flags=re.UNICODE))
+    return initials + family
+
+
 class Bibtex:
     """Minimal bibtex reader producing short/long HTML descriptions."""
 
@@ -42,23 +146,19 @@ class Bibtex:
             self.error = 'Bibtex file "{:s}" not found.'.format(bfile)
             return
 
-        try:
-            import bibtexparser
-        except ImportError:
-            self.error = (
-                "The 'bibtexparser' package is required for bibliography "
-                "support. Install Revealer with its dependencies (pipx)."
-            )
-            return
-
         with open(bfile) as bibtex_file:
-            self.base = bibtexparser.load(bibtex_file)
+            try:
+                import bibtexparser
+            except ImportError:
+                self.base = _parse_bibtex_fallback(bibtex_file.read())
+            else:
+                self.base = bibtexparser.load(bibtex_file)
 
     def add_entry(self, tag):
         if self.error is not None:
-            return
+            return False
         if tag in self.item_tag:
-            return
+            return True
 
         for entry in self.base.entries:
             if entry.get("ID") != tag:
@@ -73,13 +173,10 @@ class Bibtex:
             al = entry.get("author", "").split(" and ")
             sd = ""
             for i, a in enumerate(al):
-                p = a.split(" ")
-                for j in range(len(p) - 1):
-                    sd += p[j][0] + ". "
-                sd += p[-1]
+                sd += _format_bib_author_short(a)
 
                 if len(al) > 2:
-                    sd += " <i>et. al</i>"
+                    sd += " <i>et al.</i>"
                     break
                 elif i < len(al) - 1:
                     sd += ", "
@@ -90,6 +187,8 @@ class Bibtex:
             if journal is not None:
                 entry["journal-short"] = self.JOURNAL_SHORT.get(journal, journal)
             break
+
+        return tag in self.item_tag
 
     def short_description(self, tag):
         if self.error is not None:
@@ -124,6 +223,7 @@ def contentify(html: str) -> str:
     html = ""
     codemode = False
     colmode = False
+    alignmode = False
 
     # Stack to manage nested unordered lists: one entry per open <ul>
     ul_stack: list[int] = []
@@ -155,6 +255,25 @@ def contentify(html: str) -> str:
             html += "</ul>"
             ul_stack.pop()
             li_open.pop()
+
+    def _close_align():
+        nonlocal html, alignmode
+        if alignmode:
+            html += "</div>"
+            alignmode = False
+
+    def _open_align(value: str) -> bool:
+        nonlocal html, alignmode
+        align = value.strip().lower()
+        if align in {"none", "default", "reset"}:
+            _close_align()
+            return True
+        if align not in {"left", "center", "right", "justify"}:
+            return False
+        _close_align()
+        html += '<div class="rv-align rv-align-{0}">'.format(align)
+        alignmode = True
+        return True
 
     def _escape_style_value(value: str) -> str:
         return value.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
@@ -235,6 +354,7 @@ def contentify(html: str) -> str:
             ".rv-table{{display:grid;width:100%;height:100%;box-sizing:border-box;}}"
             ".rv-table-cell{{display:flex;align-items:center;justify-content:center;text-align:center;"
             "box-sizing:border-box;padding:.25em;overflow:hidden;}}"
+            ".rv-table-cell>div{{width:100%;}}"
             ".rv-table.bordered .rv-table-cell{{border:1px solid #444;}}"
             "</style>"
             '<div class="rv-table-wrap" style="padding:{margin};">'
@@ -283,6 +403,16 @@ def contentify(html: str) -> str:
             html += line
 
         else:
+
+            # --- Text alignment
+
+            align = re.match(r"^>\s*align\s*:\s*(.*?)\s*$", line)
+            if align:
+                _close_lists()
+                if not _open_align(align.group(1)):
+                    html += line + "\n"
+                index += 1
+                continue
 
             # --- Table blocks
 
@@ -361,6 +491,7 @@ def contentify(html: str) -> str:
             if line.startswith("||"):
                 _close_lists()
                 if colmode:
+                    _close_align()
                     html += "</div></div>"
                 else:
                     html += (
@@ -374,6 +505,7 @@ def contentify(html: str) -> str:
                 continue
             elif colmode and line.startswith("|"):
                 _close_lists()
+                _close_align()
                 html += '</div><div class="column" style="flex: 0 0 ' + (
                     "47%" if len(line) == 1 else line[1:].strip()
                 ) + ';">'
@@ -403,6 +535,7 @@ def contentify(html: str) -> str:
         html += "</code></pre>"
     # Close any open list items and uls
     _close_lists()
+    _close_align()
     if len(ul_stack) == 0 and list_style_injected:
         # preserve previous behaviour: add a break after lists
         html += "<br>"
@@ -461,6 +594,8 @@ def build(pfile: str) -> str:
 
     setting = {}
     slide = []
+    author_blocks = []
+    current_author_block = None
     notes = False
     table_mode = False
 
@@ -512,7 +647,7 @@ def build(pfile: str) -> str:
 
             # --- Settings
 
-            if line.startswith(">"):
+            if line.startswith(">") or (not len(slide) and re.match(r"^\s+>", line)):
 
                 table_start = re.match(r"^>\s*table\(\s*\d+\s*,\s*\d+\s*\)\s*$", line)
                 table_end = re.match(r"^>\s*end\s*:\s*table\s*$", line)
@@ -531,20 +666,39 @@ def build(pfile: str) -> str:
                 if line.startswith("> notes:"):
                     notes = True
 
-                x = re.search("^> ([^:]*): (.*)", line)
+                x = re.match(r"^(\s*)>\s*([^:]*):\s*(.*)", line)
                 if x:
+                    indent, key, value = x.group(1), x.group(2), x.group(3)
+
+                    if len(slide) and not notes and key == "align":
+                        slide[-1]["html"] += line
+                        continue
+
+                    if not len(slide) and key in {"author", "photo"}:
+                        if indent:
+                            if current_author_block is None:
+                                current_author_block = {}
+                                author_blocks.append(current_author_block)
+                            current_author_block[key] = value
+                            if key == "author":
+                                _append_setting(setting, key, value)
+                            continue
+                        if key == "photo":
+                            current_author_block = {"photo": value}
+                            author_blocks.append(current_author_block)
+                            continue
+
                     if len(slide):
                         target = slide[-1]["param"]
                     else:
                         target = setting
 
-                    key, value = x.group(1), x.group(2)
-                    if key in target:
-                        if not isinstance(target[key], list):
-                            target[key] = [target[key]]
-                        target[key].append(value)
-                    else:
-                        target[key] = value
+                    _append_setting(target, key, value)
+
+                    if not len(slide) and key == "author":
+                        current_author_block = {"author": value}
+                        author_blocks.append(current_author_block)
+
                     # If this is an inline svg directive inside a slide,
                     # insert a placeholder into the slide HTML so that the
                     # SVG can be emitted exactly where the directive appears
@@ -582,11 +736,8 @@ def build(pfile: str) -> str:
 
     # --- Path fixing
 
-    for old, new in [
-        ('<link rel="stylesheet" href="', '<link rel="stylesheet" href="reveal.js/'),
-        ('<script src="', '<script src="reveal.js/'),
-    ]:
-        out = out.replace(old, new)
+    out = re.sub(r'(<link\b[^>]*\bhref=")(?!https?://|/|reveal\.js/)', r'\1reveal.js/', out)
+    out = re.sub(r'(<script\b[^>]*\bsrc=")(?!https?://|/|reveal\.js/)', r'\1reveal.js/', out)
 
     # --- Settings substitution
 
@@ -602,7 +753,7 @@ def build(pfile: str) -> str:
 
     # --- Per-presentation reveal.js options ---------------------------------
     # Collect settings that should be forwarded to Reveal.initialize().
-    def _to_js_literal(val):
+    def _to_js_literal(val, key=None):
         if isinstance(val, bool):
             return "true" if val else "false"
         try:
@@ -611,6 +762,8 @@ def build(pfile: str) -> str:
                 return str(val)
             s = str(val).strip()
             ls = s.lower()
+            if key and key.lower().endswith("transition") and ls == "false":
+                return "'none'"
             if ls in ("true", "false", "null"):
                 return ls
             # integer
@@ -635,6 +788,7 @@ def build(pfile: str) -> str:
         "author",
         "event",
         "slideNumber",
+        "photo",
     }
 
     # Backwards-compatibility aliases for common option names in .pres files
@@ -648,13 +802,13 @@ def build(pfile: str) -> str:
             continue
         mapped_key = alias_map.get(k.lower(), k)
         if isinstance(v, list):
-            js_items = ", ".join(_to_js_literal(x) for x in v)
+            js_items = ", ".join(_to_js_literal(x, mapped_key) for x in v)
             jsval = f"[{js_items}]"
         else:
-            jsval = _to_js_literal(v)
+            jsval = _to_js_literal(v, mapped_key)
         opts.append(f"{mapped_key}: {jsval}")
 
-    extra = "" if not opts else "\n        " + ",\n        ".join(opts) + "\n        "
+    extra = "" if not opts else "\n        " + ",\n        ".join(opts) + ",\n        "
     out = out.replace("__REVEAL_OPTIONS__", extra)
 
     # --- Revealer javascript
@@ -684,6 +838,12 @@ def build(pfile: str) -> str:
 
             if S["param"].get("style") == "dark":
                 opt += ' class="dark"'
+
+            if "theme" in S["param"]:
+                opt += ' data-rv-theme="{:s}"'.format(_escape_attr(S["param"]["theme"]))
+
+            if S["param"].get("header") == "none":
+                opt += ' data-rv-header="none"'
 
             if "background" in S["param"]:
                 if S["param"]["background"].find(".") == -1:
@@ -738,7 +898,25 @@ def build(pfile: str) -> str:
 
                 if "author" in setting:
                     authors = setting["author"] if isinstance(setting["author"], list) else [setting["author"]]
-                    body += ", ".join(authors)
+                    photo_mode = any(block.get("photo") for block in author_blocks)
+                    if photo_mode:
+                        by_name = {block.get("author"): block for block in author_blocks if block.get("author")}
+                        body += '<div class="rv-author-grid">'
+                        for author in authors:
+                            block = by_name.get(author, {"author": author})
+                            body += '<div class="rv-author-card">'
+                            if block.get("photo"):
+                                body += '<img class="rv-author-photo" src="{:s}" alt="{:s}">'.format(
+                                    _escape_attr(block["photo"]), _escape_attr(_strip_tags(author))
+                                )
+                            else:
+                                body += '<div class="rv-author-photo rv-author-photo-missing">{:s}</div>'.format(
+                                    _initials(author)
+                                )
+                            body += '<div class="rv-author-name">{:s}</div></div>'.format(author)
+                        body += "</div>"
+                    else:
+                        body += ", ".join(authors)
 
                 if "event" in setting:
                     body += '<div id="event">' + setting["event"] + "</div>"

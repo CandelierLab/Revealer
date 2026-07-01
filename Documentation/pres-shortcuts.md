@@ -48,6 +48,49 @@ default width.
 
 <img class="rv-snapshot" src="_static/snapshots/columns.svg" alt="Snapshot of a rendered two-column slide">
 
+## Text alignment
+
+Use `> align:` to align text from that point in the current content block. The
+accepted values are `left`, `center`, `right` and `justify`. Use `none`,
+`default` or `reset` to close the current alignment block and return to the
+surrounding style.
+
+At the start of a slide, the alignment applies to the slide body:
+
+```html
+=== Motivation
+> align: left
+
+This slide is left-aligned.
+```
+
+Inside a multi-column block, each column can choose its own alignment:
+
+```html
+=== Comparison
+
+||
+> align: left
+Left column
+|
+> align: justify
+Longer text in the right column can be justified.
+||
+```
+
+Inside a table, put `> align:` at the start of the cell content:
+
+```html
+> table(1,2)
+> cell
+> align: right
+Right-aligned cell
+
+> cell
+> align: center
+Centered cell
+```
+
 ## Tables
 
 Use `> table(rows, columns)` to start a table environment. Cells are centered

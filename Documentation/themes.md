@@ -14,6 +14,21 @@ Select a theme in the settings part of a `.pres` file:
 > theme: ljp
 ```
 
+You can also switch theme for a single slide:
+
+```html
+=== Interlude
+> theme: black
+
+This slide uses the `black` theme; the next slide returns to the presentation
+theme automatically.
+```
+
+This swaps the theme stylesheet while the slide is active, so it works best for
+complete reveal.js themes (`black`, `white`, `league`, `ljp`, `revealer`, ...).
+The switch is local to the current slide: navigating away restores the global
+theme selected in the settings block.
+
 ## Customising
 
 The built-in themes are intentionally thin. They `@import` a shared, theme-agnostic

@@ -496,6 +496,62 @@ footer {
   color: grey;
 }
 
+.rv-author-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.8em;
+  width: min(90%, 820px);
+  margin: 0.5em auto 0;
+  align-items: start;
+}
+
+.rv-author-card {
+  display: grid;
+  gap: 0.35em;
+  justify-items: center;
+  font-size: 0.72em;
+  line-height: 1.15;
+}
+
+.rv-author-photo {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ddd;
+}
+
+.rv-author-photo-missing {
+  display: grid;
+  place-items: center;
+  color: #666;
+  font-family: var(--r-heading-font);
+}
+
+.rv-author-name {
+  max-width: 140px;
+}
+
+.rv-align {
+  width: 100%;
+}
+
+.rv-align-left {
+  text-align: left;
+}
+
+.rv-align-center {
+  text-align: center;
+}
+
+.rv-align-right {
+  text-align: right;
+}
+
+.rv-align-justify {
+  text-align: justify;
+}
+
 .column {
   margin: 2% 0 2% 2%;
   font-size: 0.8em;
@@ -506,6 +562,7 @@ footer {
 .biblio-short {
   float: left;
   width: 45%;
+  font-size: 0.72em;
   line-height: 1.2em;
   text-align: left;
   margin-left: 5%;

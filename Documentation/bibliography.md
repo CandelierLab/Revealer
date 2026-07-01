@@ -10,8 +10,10 @@ Point the presentation at a `.bib` file in the settings:
 > bibtex: biblio.bib
 ```
 
-Bibliography support relies on the `bibtexparser` library, which is installed
-automatically with the CLI (see [Installation](installation.md)).
+Bibliography support uses the `bibtexparser` library when it is available; it is
+installed automatically with the CLI (see [Installation](installation.md)). When
+Revealer is run from a lightweight Python environment without that dependency, a
+minimal built-in BibTeX reader is used so common article entries still resolve.
 
 ## Citing references
 

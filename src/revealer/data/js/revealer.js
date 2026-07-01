@@ -3,8 +3,22 @@
 function set_fixed(slide) {
   // Set slide fixed divs
 
-  $('header').html($(slide).children(".slide_header").html());
-  $('footer').html($(slide).children(".slide_footer").html());
+  var headerHtml = $(slide).children(".slide_header").html() || '';
+  var footerHtml = $(slide).children(".slide_footer").html() || '';
+  var hideHeader = slide && slide.getAttribute('data-rv-header') === 'none';
+
+  $('header').html(headerHtml).css('display', (hideHeader || !headerHtml) ? 'none' : 'block');
+  $('footer').html(footerHtml).css('display', footerHtml ? 'block' : 'none');
+
+  var themeLink = document.getElementById('rv-theme');
+  if (themeLink) {
+    if (!themeLink.dataset.rvDefaultHref) {
+      themeLink.dataset.rvDefaultHref = themeLink.getAttribute('href');
+    }
+    var slideTheme = slide ? slide.getAttribute('data-rv-theme') : null;
+    var baseHref = themeLink.dataset.rvDefaultHref.replace(/[^/]+\.css$/, '');
+    themeLink.setAttribute('href', slideTheme ? baseHref + slideTheme + '.css' : themeLink.dataset.rvDefaultHref);
+  }
 
   if ($(slide).hasClass('dark')) {
     $('body').addClass('dark');
@@ -169,7 +183,7 @@ function revealerApplyFragment(fragment, restore) {
     if (!el._revealerOrig) el._revealerOrig = {};
     if (!el._revealerOrigStyle) el._revealerOrigStyle = {};
 
-    el.style.transition = 'all ' + duration + 'ease';
+    el.style.transition = 'all ' + duration + ' ease';
 
     attrs.forEach(function (pair) {
       var name = pair[0];
@@ -243,6 +257,7 @@ Reveal.on('fragmenthidden', function (event) {
 });
 
 Reveal.on('ready', function (event) {
+  set_fixed(event.currentSlide);
   fitSlide(event.currentSlide);
   // Re-fit after asynchronous rendering (KaTeX math, web fonts) settles.
   requestAnimationFrame(function () { fitSlide(Reveal.getCurrentSlide()); });
