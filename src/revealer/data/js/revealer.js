@@ -112,12 +112,33 @@ function fitSlide(slide) {
   content.style.height = boxH + 'px';
 
   // Reset the scale before measuring the natural content size.
+  inner.style.width = '100%';
   inner.style.transform = 'translate(-50%, -50%) scale(1)';
   var cw = inner.scrollWidth;
   var ch = inner.scrollHeight;
 
   var fit = Math.min(boxW / cw, boxH / ch, 1);
   if (!isFinite(fit) || fit <= 0) fit = 1;
+
+  // Multi-column slides are often height-limited. If we uniformly scale them
+  // down, their visual width shrinks too, leaving unused horizontal space.
+  // Expand the unscaled wrapper to compensate so the scaled columns still span
+  // the available content box.
+  if (inner.querySelector(':scope > .multi-column') && fit < 1) {
+    for (var i = 0; i < 3; i++) {
+      inner.style.width = (boxW / fit) + 'px';
+      cw = inner.scrollWidth;
+      ch = inner.scrollHeight;
+      var nextFit = Math.min(boxW / cw, boxH / ch, 1);
+      if (!isFinite(nextFit) || nextFit <= 0) nextFit = 1;
+      if (Math.abs(nextFit - fit) < 0.005) {
+        fit = nextFit;
+        break;
+      }
+      fit = nextFit;
+    }
+    inner.style.width = (boxW / fit) + 'px';
+  }
 
   inner.style.transform = 'translate(-50%, -50%) scale(' + fit + ')';
 

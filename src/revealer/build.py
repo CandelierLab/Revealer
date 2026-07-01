@@ -494,11 +494,11 @@ def contentify(html: str) -> str:
                     _close_align()
                     html += "</div></div>"
                 else:
+                    width = "" if len(line) == 2 else ' style="flex-basis:{:s};"'.format(line[2:].strip())
                     html += (
-                        "<style>.multi-column{ display: flex; } .column{ flex: 1; }</style>"
-                        '<div class="multi-column"><div class="column" style="flex: 0 0 '
-                        + ("47%" if len(line) == 2 else line[2:].strip())
-                        + ';">'
+                        '<div class="multi-column"><div class="column"'
+                        + width
+                        + ">"
                     )
                 colmode = not colmode
                 index += 1
@@ -506,9 +506,8 @@ def contentify(html: str) -> str:
             elif colmode and line.startswith("|"):
                 _close_lists()
                 _close_align()
-                html += '</div><div class="column" style="flex: 0 0 ' + (
-                    "47%" if len(line) == 1 else line[1:].strip()
-                ) + ';">'
+                width = "" if len(line) == 1 else ' style="flex-basis:{:s};"'.format(line[1:].strip())
+                html += '</div><div class="column"' + width + ">"
                 index += 1
                 continue
 

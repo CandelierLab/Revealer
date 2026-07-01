@@ -552,12 +552,21 @@ footer {
   text-align: justify;
 }
 
-.column {
-  margin: 2% 0 2% 2%;
-  font-size: 0.8em;
+.multi-column {
+  display: flex;
+  gap: 5%;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.column:first-of-type { padding-left: 0; }
+.column {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 2% 0;
+  font-size: 0.8em;
+}
 
 .biblio-short {
   float: left;

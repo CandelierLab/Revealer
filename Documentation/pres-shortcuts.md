@@ -32,17 +32,28 @@ for value in range(3):
 
 Use `||` to start and close a multi-column block. A line starting with `|`
 starts the next column. Widths are optional; without them, columns use the
-default width.
+available width equally, with a theme-defined gap between columns.
 
 ```html
-|| 48%
+||
 <h3>Column A</h3>
 * Velocity rule
 * Orientation rule
-| 48%
+|
 <h3>Column B</h3>
 * Discrete state
 * Grid update
+||
+```
+
+You can still provide explicit widths. They are used as CSS `flex-basis` values,
+so the columns fill the slide area and the gap is handled separately:
+
+```html
+|| 30%
+Narrow column
+| 65%
+Wide column
 ||
 ```
 
