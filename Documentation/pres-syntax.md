@@ -68,7 +68,10 @@ Second column
 ||
 ```
 
-Margins are 2%, so the widths should sum to `100 − 4 × ncol`.
+Blocks are spread across the full slide width with an equal spacing at the edges
+and between them (`column-spacing`). See
+[Content shortcuts › Columns](pres-shortcuts.md#columns) and
+[Layout parameters](pres-structure.md#layout-parameters).
 
 ### Bullet lists
 

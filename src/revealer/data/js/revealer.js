@@ -40,8 +40,10 @@ function set_fixed(slide) {
  * the header.
  */
 
-// Light margin applied on each edge, as a fraction of the slide dimensions.
-var RV_MARGIN = 0.035;
+// Default geometry (fractions of slide dimensions), overridable per slide via
+// data-rv-* attributes emitted by the builder.
+var RV_HEADER_MARGIN = 0.05;   // vertical gap header/footer <-> central area
+var RV_COLUMN_SPACING = 0.05;  // horizontal edge + inter-block spacing
 
 function rv_slidesElement() {
   return document.querySelector('.reveal .slides');
@@ -65,6 +67,42 @@ function rv_bandFromBottom(el, slidesRect, scale) {
   return Math.max(0, (slidesRect.bottom - r.top) / scale);
 }
 
+function rv_num(slide, attr, fallback) {
+  if (!slide) return fallback;
+  var v = parseFloat(slide.getAttribute(attr));
+  return isFinite(v) ? v : fallback;
+}
+
+// Natural content height of a block in its own coordinates. Measured with the
+// content top-aligned so overflow (which would bleed symmetrically when
+// centered) is captured reliably.
+function rv_blockContentHeight(col) {
+  var prev = col.style.justifyContent;
+  col.style.justifyContent = 'flex-start';
+  var h = col.scrollHeight;
+  col.style.justifyContent = prev;
+  return h;
+}
+
+// Reduce the block font size until its content fits the available height.
+// Returns the applied font scale (<= 1).
+function rv_fitBlock(col, avail) {
+  col.style.setProperty('--rv-fontscale', 1);
+  if (rv_blockContentHeight(col) <= avail + 0.5) return 1;
+  var lo = 0.2, hi = 1;
+  for (var i = 0; i < 20; i++) {
+    var mid = (lo + hi) / 2;
+    col.style.setProperty('--rv-fontscale', mid);
+    if (rv_blockContentHeight(col) <= avail + 0.5) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  col.style.setProperty('--rv-fontscale', lo);
+  return lo;
+}
+
 function fitSlide(slide) {
   if (!slide) return;
 
@@ -86,11 +124,15 @@ function fitSlide(slide) {
   var scale = slidesRect.height / H;
   if (!isFinite(scale) || scale <= 0) scale = 1;
 
-  // Reserve the space taken by the visible top bar (header or logo strip)
-  // and the footer, expressed in slide coordinates.
+  // Optional explicit header / footer heights (fraction of slide height).
   var header = document.querySelector('body > header');
   var footer = document.querySelector('body > footer');
   var hlogos = document.getElementById('hlogos');
+
+  var hh = rv_num(slide, 'data-rv-header-height', NaN);
+  if (isFinite(hh) && header) header.style.height = (hh * slidesRect.height) + 'px';
+  var fh = rv_num(slide, 'data-rv-footer-height', NaN);
+  if (isFinite(fh) && footer) footer.style.height = (fh * slidesRect.height) + 'px';
 
   var topReserve = Math.max(
     rv_bandFromTop(header, slidesRect, scale),
@@ -98,12 +140,16 @@ function fitSlide(slide) {
   );
   var bottomReserve = rv_bandFromBottom(footer, slidesRect, scale);
 
-  var mh = RV_MARGIN * W;
-  var mv = RV_MARGIN * H;
+  // Vertical breathing margin between header/footer and the central area.
+  var headerMargin = rv_num(slide, 'data-rv-header-margin', RV_HEADER_MARGIN);
+  var columnSpacing = rv_num(slide, 'data-rv-column-spacing', RV_COLUMN_SPACING);
+  var mv = headerMargin * H;
 
-  var boxLeft = mh;
+  // The central area spans the full slide width; horizontal spacing between
+  // blocks and edges is handled by the `.multi-column` padding / gap.
+  var boxLeft = 0;
   var boxTop = topReserve + mv;
-  var boxW = Math.max(1, W - 2 * mh);
+  var boxW = Math.max(1, W);
   var boxH = Math.max(1, H - topReserve - bottomReserve - 2 * mv);
 
   content.style.left = boxLeft + 'px';
@@ -111,36 +157,45 @@ function fitSlide(slide) {
   content.style.width = boxW + 'px';
   content.style.height = boxH + 'px';
 
-  // Reset the scale before measuring the natural content size.
-  inner.style.width = '100%';
+  // The inner wrapper fills the central area exactly (no global scaling); each
+  // block scales its own font to fit.
+  inner.style.width = boxW + 'px';
+  inner.style.height = boxH + 'px';
   inner.style.transform = 'translate(-50%, -50%) scale(1)';
-  var cw = inner.scrollWidth;
-  var ch = inner.scrollHeight;
 
-  var fit = Math.min(boxW / cw, boxH / ch, 1);
-  if (!isFinite(fit) || fit <= 0) fit = 1;
+  var multi = inner.querySelector(':scope > .multi-column');
+  if (multi) {
+    multi.style.setProperty('--rv-column-spacing', (columnSpacing * 100) + '%');
+    var cols = Array.prototype.slice.call(
+      multi.querySelectorAll(':scope > .column')
+    );
+    var widthMode = slide.getAttribute('data-rv-column-width') || 'equal';
 
-  // Multi-column slides are often height-limited. If we uniformly scale them
-  // down, their visual width shrinks too, leaving unused horizontal space.
-  // Expand the unscaled wrapper to compensate so the scaled columns still span
-  // the available content box.
-  if (inner.querySelector(':scope > .multi-column') && fit < 1) {
-    for (var i = 0; i < 3; i++) {
-      inner.style.width = (boxW / fit) + 'px';
-      cw = inner.scrollWidth;
-      ch = inner.scrollHeight;
-      var nextFit = Math.min(boxW / cw, boxH / ch, 1);
-      if (!isFinite(nextFit) || nextFit <= 0) nextFit = 1;
-      if (Math.abs(nextFit - fit) < 0.005) {
-        fit = nextFit;
-        break;
+    cols.forEach(function (c) { c.style.flex = '1 1 0'; });
+
+    if (widthMode === 'auto' && cols.length > 1) {
+      // Reallocate width between blocks so their font scales get balanced:
+      // a block that had to shrink more receives a bit more width. Damped and
+      // capped so it converges quickly even for image-heavy blocks.
+      var weights = cols.map(function () { return 1; });
+      for (var it = 0; it < 4; it++) {
+        cols.forEach(function (c, i) { c.style.flex = weights[i].toFixed(4) + ' 1 0'; });
+        void multi.offsetHeight;
+        var scales = cols.map(function (c) { return rv_fitBlock(c, c.clientHeight); });
+        var next = weights.map(function (w, i) {
+          return w / Math.sqrt(Math.max(scales[i], 0.05));
+        });
+        var sum = next.reduce(function (a, b) { return a + b; }, 0);
+        weights = next.map(function (w) { return (w / sum) * cols.length; });
       }
-      fit = nextFit;
+      cols.forEach(function (c, i) { c.style.flex = weights[i].toFixed(4) + ' 1 0'; });
     }
-    inner.style.width = (boxW / fit) + 'px';
-  }
 
-  inner.style.transform = 'translate(-50%, -50%) scale(' + fit + ')';
+    void multi.offsetHeight;
+    cols.forEach(function (col) {
+      rv_fitBlock(col, col.clientHeight);
+    });
+  }
 
   // Re-fit once media with intrinsic size has loaded (images / videos), since
   // their natural dimensions are unknown before that.

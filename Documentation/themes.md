@@ -53,3 +53,8 @@ The theme files live in `src/revealer/data/themes/` and are copied into each
 presentation's `reveal.js/dist/theme/` folder at build time. Logos remain a
 per-presentation choice (`> logo:` in the `.pres` file) and are independent of
 the theme.
+
+The header and footer band heights are not theme variables: they follow the
+theme's default look, and can be overridden per presentation with
+`> header-height:` / `> footer-height:` (a fraction of the slide height). See
+[Layout parameters](pres-structure.md#layout-parameters).

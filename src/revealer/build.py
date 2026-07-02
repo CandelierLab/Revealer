@@ -216,8 +216,261 @@ class Bibtex:
         )
 
 
-def contentify(html: str) -> str:
-    """Translate Revealer content shortcuts into HTML."""
+def _is_truthy(value: str) -> bool:
+    return value.strip().lower() in {"true", "yes", "1", "on"}
+
+
+# --- Block / paragraph model ------------------------------------------------
+#
+# A slide's (or column's) content is organised as blocks (columns) laid out
+# horizontally, each split into paragraphs separated by blank lines. `size` and
+# `align` directives resolve to a scope (presentation / slide / block /
+# paragraph) depending on where they appear (see the documentation).
+
+
+_SCOPED_DIRECTIVE_RE = re.compile(r"^>\s*(size|align|paragraph[-_]spacing)\s*:\s*(.*)$")
+_TABLE_OPEN_RE = re.compile(r"^>\s*table\(\s*\d+\s*,\s*\d+\s*\)\s*$")
+_TABLE_END_RE = re.compile(r"^>\s*end\s*:\s*table\s*$")
+
+
+def _parse_scale(value, default=1.0):
+    """Parse a relative size such as ``0.8`` or ``80%`` into a float multiplier."""
+    text = str(value).strip()
+    percent = text.endswith("%")
+    try:
+        number = float(text.rstrip("%").strip())
+    except (TypeError, ValueError):
+        return default
+    return number / 100.0 if percent else number
+
+
+def _parse_float(value, default):
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return default
+
+
+def _norm_align(value):
+    align = str(value).strip().lower()
+    if align in {"left", "center", "right", "justify"}:
+        return align
+    return None
+
+
+def _split_into_blocks(lines):
+    """Split content lines into blocks on ``||`` / ``|`` separators.
+
+    Returns ``(preamble_lines, blocks)`` where each block is a dict with
+    ``lines`` and an optional ``width``. Code blocks (``@@``) and tables are
+    kept atomic so separators inside them are ignored.
+    """
+    preamble = []
+    blocks = []
+    current = None
+    in_code = False
+    in_table = False
+    started = False
+
+    def target():
+        return current["lines"] if current is not None else preamble
+
+    for line in lines:
+        stripped = line.strip()
+
+        if stripped.startswith("@@"):
+            in_code = not in_code
+            target().append(line)
+            continue
+        if in_code:
+            target().append(line)
+            continue
+        if _TABLE_OPEN_RE.match(stripped):
+            in_table = True
+            target().append(line)
+            continue
+        if in_table:
+            target().append(line)
+            if _TABLE_END_RE.match(stripped):
+                in_table = False
+            continue
+
+        if stripped.startswith("||"):
+            width = stripped[2:].strip() or None
+            if not started:
+                started = True
+                current = {"lines": [], "width": width}
+            else:
+                if current is not None:
+                    blocks.append(current)
+                current = None
+            continue
+        if started and stripped.startswith("|"):
+            width = stripped[1:].strip() or None
+            if current is not None:
+                blocks.append(current)
+            current = {"lines": [], "width": width}
+            continue
+
+        target().append(line)
+
+    if current is not None:
+        blocks.append(current)
+
+    if not blocks:
+        blocks = [{"lines": preamble, "width": None}]
+        preamble = []
+
+    return preamble, blocks
+
+
+def _split_into_paragraphs(lines):
+    """Split block lines into paragraphs on blank lines.
+
+    Returns a list of ``{"directives": [(key, value)...], "body": [lines...]}``.
+    Leading ``size`` / ``align`` / ``paragraph-spacing`` directives are attached
+    to the paragraph; a paragraph with directives but no body sets block-scope
+    defaults. Code blocks and tables are kept atomic.
+    """
+    groups = []
+    current = []
+    in_code = False
+    in_table = False
+
+    def flush():
+        nonlocal current
+        if any(item.strip() for item in current):
+            groups.append(current)
+        current = []
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("@@"):
+            in_code = not in_code
+            current.append(line)
+            continue
+        if in_code:
+            current.append(line)
+            continue
+        if _TABLE_OPEN_RE.match(stripped):
+            in_table = True
+            current.append(line)
+            continue
+        if in_table:
+            current.append(line)
+            if _TABLE_END_RE.match(stripped):
+                in_table = False
+            continue
+        if stripped == "":
+            flush()
+            continue
+        current.append(line)
+    flush()
+
+    paragraphs = []
+    for group in groups:
+        directives = []
+        body = []
+        for line in group:
+            match = _SCOPED_DIRECTIVE_RE.match(line.strip())
+            if match and not body:
+                key = match.group(1).replace("_", "-")
+                directives.append((key, match.group(2).strip()))
+            else:
+                body.append(line)
+        paragraphs.append({"directives": directives, "body": body})
+    return paragraphs
+
+
+def _render_block(block, base_size, base_align, base_spacing):
+    """Render one block (column) into a ``.column`` div of ``.rv-paragraph``."""
+    paragraphs = _split_into_paragraphs(block["lines"])
+
+    block_size = base_size
+    block_align = base_align
+    block_spacing = base_spacing
+
+    rendered = []
+    for para in paragraphs:
+        if not para["body"]:
+            # Directive-only paragraph -> block-scope defaults.
+            for key, value in para["directives"]:
+                if key == "size":
+                    block_size = base_size * _parse_scale(value)
+                elif key == "align":
+                    block_align = _norm_align(value) or block_align
+                elif key == "paragraph-spacing":
+                    block_spacing = _parse_float(value, block_spacing)
+            continue
+
+        para_size = block_size
+        para_align = block_align
+        for key, value in para["directives"]:
+            if key == "size":
+                para_size = block_size * _parse_scale(value)
+            elif key == "align":
+                para_align = _norm_align(value) or para_align
+
+        body_html = _contentify_legacy("\n".join(para["body"]))
+        styles = []
+        if abs(para_size - 1.0) > 1e-6:
+            styles.append("font-size:{:.4f}em".format(para_size))
+        if para_align:
+            styles.append("text-align:{}".format(para_align))
+        attr = ' style="{}"'.format(";".join(styles)) if styles else ""
+        rendered.append('<div class="rv-paragraph"{}>{}</div>'.format(attr, body_html))
+
+    col_styles = ["--rv-para-spacing:{:.3f}".format(block_spacing)]
+    if block.get("width"):
+        col_styles.append("flex-basis:{}".format(_escape_attr(block["width"])))
+    return '<div class="column" style="{}">{}</div>'.format(
+        ";".join(col_styles), "".join(rendered)
+    )
+
+
+def contentify(html, base_size=1.0, base_align=None, paragraph_spacing=0.5):
+    """Convert Revealer content into blocks and paragraphs.
+
+    ``base_size`` / ``base_align`` / ``paragraph_spacing`` are the inherited
+    presentation-scope defaults. The content is split into blocks (columns) and
+    paragraphs; ``size`` and ``align`` directives resolve to slide, block or
+    paragraph scope depending on their position.
+    """
+    text = (html or "").strip("\n")
+    if not text.strip():
+        return ""
+
+    lines = text.split("\n")
+    preamble, blocks = _split_into_blocks(lines)
+
+    slide_size = base_size
+    slide_align = base_align
+    slide_spacing = paragraph_spacing
+    for line in preamble:
+        match = _SCOPED_DIRECTIVE_RE.match(line.strip())
+        if not match:
+            continue
+        key, value = match.group(1).replace("_", "-"), match.group(2).strip()
+        if key == "size":
+            slide_size = base_size * _parse_scale(value)
+        elif key == "align":
+            slide_align = _norm_align(value) or slide_align
+        elif key == "paragraph-spacing":
+            slide_spacing = _parse_float(value, slide_spacing)
+
+    columns = "".join(
+        _render_block(block, slide_size, slide_align, slide_spacing) for block in blocks
+    )
+    return '<div class="multi-column">{}</div>'.format(columns)
+
+
+def _contentify_legacy(html: str) -> str:
+    """Render a paragraph body (lists, code, tables, highlight, raw HTML).
+
+    This is the historical per-line renderer. It is now used to render the body
+    of each paragraph produced by :func:`contentify`, which handles the block
+    (column) and paragraph structure on top of it.
+    """
 
     lines = html.strip().split("\n")
     html = ""
@@ -277,9 +530,6 @@ def contentify(html: str) -> str:
 
     def _escape_style_value(value: str) -> str:
         return value.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
-
-    def _is_truthy(value: str) -> bool:
-        return value.strip().lower() in {"true", "yes", "1", "on"}
 
     def _parse_table(start_index: int):
         start = re.match(r"^>\s*table\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*$", lines[start_index])
@@ -349,9 +599,8 @@ def contentify(html: str) -> str:
         table_classes = "rv-table bordered" if border else "rv-table"
         out = (
             "<style>"
-            ".rv-content-inner:has(> .rv-table-wrap){{height:100%;}}"
-            ".rv-table-wrap{{box-sizing:border-box;width:100%;height:100%;min-height:60vh;}}"
-            ".rv-table{{display:grid;width:100%;height:100%;box-sizing:border-box;}}"
+            ".rv-table-wrap{{box-sizing:border-box;width:100%;}}"
+            ".rv-table{{display:grid;width:100%;box-sizing:border-box;}}"
             ".rv-table-cell{{display:flex;align-items:center;justify-content:center;text-align:center;"
             "box-sizing:border-box;padding:.25em;overflow:hidden;}}"
             ".rv-table-cell>div{{width:100%;}}"
@@ -359,7 +608,7 @@ def contentify(html: str) -> str:
             "</style>"
             '<div class="rv-table-wrap" style="padding:{margin};">'
             '<div class="{table_classes}" style="grid-template-columns:repeat({cols},minmax(0,1fr));'
-            'grid-template-rows:repeat({rows},minmax(0,1fr));">'
+            'grid-template-rows:repeat({rows},auto);">'
         ).format(
             margin=_escape_style_value(margin),
             table_classes=table_classes,
@@ -375,7 +624,7 @@ def contentify(html: str) -> str:
                 background=_escape_style_value(cell["background"]),
             )
             out += '<div class="rv-table-cell" style="{style}"><div>'.format(style=style)
-            out += contentify("\n".join(cell["content"])) if cell["content"] else ""
+            out += _contentify_legacy("\n".join(cell["content"])) if cell["content"] else ""
             out += "</div></div>"
         out += "</div></div>"
         return out, index
@@ -535,9 +784,6 @@ def contentify(html: str) -> str:
     # Close any open list items and uls
     _close_lists()
     _close_align()
-    if len(ul_stack) == 0 and list_style_injected:
-        # preserve previous behaviour: add a break after lists
-        html += "<br>"
     if colmode:
         html += "</div></div>"
 
@@ -669,7 +915,10 @@ def build(pfile: str) -> str:
                 if x:
                     indent, key, value = x.group(1), x.group(2), x.group(3)
 
-                    if len(slide) and not notes and key == "align":
+                    # `size` / `align` / `paragraph-spacing` inside a slide are
+                    # kept in the content stream so their scope can be resolved
+                    # from their position (slide / block / paragraph).
+                    if len(slide) and not notes and key.strip() in {"align", "size", "paragraph-spacing"}:
                         slide[-1]["html"] += line
                         continue
 
@@ -727,6 +976,11 @@ def build(pfile: str) -> str:
     setting.setdefault("notesSize", "1em")
     setting.setdefault("svgDuration", "0.5s")
     setting["maxRefsPerPage"] = int(setting.get("maxRefsPerPage", 5))
+
+    # Presentation-scope content defaults (size / align / paragraph spacing).
+    pres_size = _parse_scale(setting["size"]) if "size" in setting else 1.0
+    pres_align = _norm_align(setting["align"]) if "align" in setting else None
+    pres_spacing = _parse_float(setting.get("paragraph-spacing", 0.5), 0.5)
 
     # === Output ==============================================================
 
@@ -788,6 +1042,15 @@ def build(pfile: str) -> str:
         "event",
         "slideNumber",
         "photo",
+        "rounded_photos",
+        "size",
+        "align",
+        "paragraph-spacing",
+        "header-height",
+        "footer-height",
+        "header-margin",
+        "column-spacing",
+        "column-width",
     }
 
     # Backwards-compatibility aliases for common option names in .pres files
@@ -863,6 +1126,18 @@ def build(pfile: str) -> str:
             if "attr" in S["param"] and not isinstance(S["param"]["attr"], list):
                 opt += " " + S["param"]["attr"]
 
+            # Geometry parameters (slide scope, falling back to presentation).
+            def _geom(key, default):
+                return S["param"].get(key, setting.get(key, default))
+
+            opt += ' data-rv-header-margin="{}"'.format(_geom("header-margin", "0.05"))
+            opt += ' data-rv-column-spacing="{}"'.format(_geom("column-spacing", "0.05"))
+            opt += ' data-rv-column-width="{}"'.format(_geom("column-width", "equal"))
+            for hk in ("header-height", "footer-height"):
+                hv = _geom(hk, None)
+                if hv is not None:
+                    opt += ' data-rv-{}="{}"'.format(hk, _escape_attr(str(hv)))
+
             content += "<section {:s}>".format(opt)
 
             if "color" in S["param"]:
@@ -897,10 +1172,12 @@ def build(pfile: str) -> str:
 
                 if "author" in setting:
                     authors = setting["author"] if isinstance(setting["author"], list) else [setting["author"]]
+                    rounded_photos = _is_truthy(setting.get("rounded_photos", "false"))
                     photo_mode = any(block.get("photo") for block in author_blocks)
                     if photo_mode:
                         by_name = {block.get("author"): block for block in author_blocks if block.get("author")}
-                        body += '<div class="rv-author-grid">'
+                        grid_class = "rv-author-grid rv-author-photos-rounded" if rounded_photos else "rv-author-grid"
+                        body += '<div class="{:s}">'.format(grid_class)
                         for author in authors:
                             block = by_name.get(author, {"author": author})
                             body += '<div class="rv-author-card">'
@@ -940,8 +1217,10 @@ def build(pfile: str) -> str:
                         else:
                             content += '<div class="slide_header">{:s} - {:d}/{:d}</div>'.format(title, i + 1, npages)
                         content += '<div class="rv-content"><div class="rv-content-inner">'
+                        content += '<div class="multi-column"><div class="column" style="--rv-para-spacing:0.5"><div class="rv-paragraph">'
                         for j in range(sindex, min(sindex + setting["maxRefsPerPage"], len(biblio.item_num))):
                             content += '<div class="biblio-long">' + biblio.long_description(biblio.item_num[j]["ID"]) + "</div>"
+                        content += "</div></div></div>"
                         content += "</div></div>"
                         sindex += setting["maxRefsPerPage"]
                         content += "</section>"
@@ -965,9 +1244,13 @@ def build(pfile: str) -> str:
         # prefix the SVG before the slide content.
         placeholder = S["param"].get("_svg_placeholder") if "param" in S else None
         if placeholder and placeholder in S["html"]:
-            body += contentify(S["html"]).replace(placeholder, svg_html)
+            body += contentify(
+                S["html"], base_size=pres_size, base_align=pres_align, paragraph_spacing=pres_spacing
+            ).replace(placeholder, svg_html)
         else:
-            body += svg_html + contentify(S["html"])
+            body += svg_html + contentify(
+                S["html"], base_size=pres_size, base_align=pres_align, paragraph_spacing=pres_spacing
+            )
 
         # --- Speaker notes (kept as a direct child of <section>) -------------
 
@@ -979,7 +1262,7 @@ def build(pfile: str) -> str:
                 + nS
                 + ";} .speaker-controls-notes ul {margin: 0px; padding-left: 10px;}</style>"
             )
-            notes_html += contentify(S["notes"]) + "</aside>"
+            notes_html += _contentify_legacy(S["notes"]) + "</aside>"
 
         # --- Bibliography citations
 
@@ -1007,7 +1290,16 @@ def build(pfile: str) -> str:
             content += "<style>.slide_{:d} footer {{ display: block; }}</style>".format(k)
 
         # The visible body is wrapped so the runtime can center it inside the
-        # area left by the header/footer and rescale it to always fit.
+        # area left by the header/footer and rescale it to always fit. Slides
+        # whose body is built directly (first, section, ...) are wrapped in a
+        # single block so the block layout / per-block font scaling applies.
+        if 'class="multi-column"' not in body:
+            body = (
+                '<div class="multi-column"><div class="column" '
+                'style="--rv-para-spacing:0.5"><div class="rv-paragraph">'
+                + body
+                + "</div></div></div>"
+            )
         content += '<div class="rv-content"><div class="rv-content-inner">' + body + "</div></div>"
         content += notes_html + "\n</section>"
 

@@ -10,6 +10,7 @@ expected rendering for each one.
 
 - Lines that trigger a shortcut must start with the designated character or command.
 - Raw HTML is accepted anywhere and is passed through to the final output.
+- Blank lines separate [paragraphs](#paragraphs); leading/trailing blank lines are ignored.
 - For list and column shortcuts, a mandatory space after the marker is required where shown.
 - Indentation matters for nested lists: use 2 spaces per nesting level.
 
@@ -28,11 +29,67 @@ for value in range(3):
 
 <img class="rv-snapshot" src="_static/snapshots/code-snippet.svg" alt="Snapshot of a rendered code block">
 
+## Paragraphs
+
+Inside a slide — and inside each column — content is split into **paragraphs**
+separated by blank lines. A paragraph can be a block of text, a bullet list, an
+image, a video, a blockquote, a table, and so on. Paragraphs are stacked
+vertically, centered in their block, with a uniform spacing between them
+controlled by `paragraph-spacing` (in line-heights, `0.5` by default).
+
+```
+=== A slide
+
+This is the first paragraph.
+
+This is the second paragraph.
+It can span several source lines.
+
+<img src="media/figure.svg">
+
+* a bullet list is a paragraph too
+* second item
+```
+
+Leading and trailing blank lines are ignored, and several consecutive blank
+lines still count as a single break.
+
+### Per-paragraph size and alignment
+
+`> size:` sets a relative font size (a factor such as `0.8` or `120%`) and
+`> align:` sets the alignment (`left`, `center`, `right`, `justify`). Their
+**scope depends on where they appear**:
+
+- **Attached to a paragraph** (immediately before its content, with no blank
+  line in between): they affect only that paragraph.
+- **Alone** (followed by a blank line) at the top of a slide or a column: they
+  become the default for that slide or that block.
+- **In the settings block**: they become the presentation default.
+
+`size` factors cascade multiplicatively (presentation × slide × block ×
+paragraph).
+
+```
+=== Sizes
+
+> size: 0.8
+> align: right
+This paragraph is 80% of the base size and right-aligned.
+
+> size: 0.5
+* This list is half size…
+* …and so is this item.
+```
+
+Images in a paragraph fill the block width by default and scale together with
+the block font; you can still resize any of them with an explicit width, e.g.
+`<img src="..." style="width: 60%">`.
+
 ## Columns
 
 Use `||` to start and close a multi-column block. A line starting with `|`
-starts the next column. Widths are optional; without them, columns use the
-available width equally, with a theme-defined gap between columns.
+starts the next column. Widths are optional; without them, columns share the
+available width equally.
 
 ```html
 ||
@@ -46,8 +103,18 @@ available width equally, with a theme-defined gap between columns.
 ||
 ```
 
-You can still provide explicit widths. They are used as CSS `flex-basis` values,
-so the columns fill the slide area and the gap is handled separately:
+Each block fills the full height of the central area and shrinks its own font
+until its content fits (per-block scaling). Blocks are spread across the full
+slide width, with an equal spacing at the edges and between them
+(`column-spacing`, a slide parameter). Set `> column-width: auto` on the slide
+to let Revealer rebalance the block widths so their font sizes come out as even
+as possible.
+
+Inside a column, bullet lists always start on their own line (they are rendered
+as block elements), so a list written right after a line of text no longer flows
+next to it.
+
+You can still provide explicit widths. They are used as CSS `flex-basis` values:
 
 ```html
 || 30%
@@ -59,14 +126,13 @@ Wide column
 
 <img class="rv-snapshot" src="_static/snapshots/columns.svg" alt="Snapshot of a rendered two-column slide">
 
-## Text alignment
+## Text size and alignment
 
-Use `> align:` to align text from that point in the current content block. The
-accepted values are `left`, `center`, `right` and `justify`. Use `none`,
-`default` or `reset` to close the current alignment block and return to the
-surrounding style.
+`> size:` and `> align:` are contextual directives (see
+[Paragraphs](#per-paragraph-size-and-alignment) for how their scope is deduced
+from their position). `align` accepts `left`, `center`, `right` and `justify`.
 
-At the start of a slide, the alignment applies to the slide body:
+At the start of a slide, a standalone directive applies to the whole slide:
 
 ```html
 === Motivation
@@ -75,7 +141,7 @@ At the start of a slide, the alignment applies to the slide body:
 This slide is left-aligned.
 ```
 
-Inside a multi-column block, each column can choose its own alignment:
+Inside a multi-column block, each column can choose its own size and alignment:
 
 ```html
 === Comparison
