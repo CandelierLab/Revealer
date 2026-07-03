@@ -207,8 +207,8 @@ Bottom right
 ```
 
 `> border: false` keeps the grid invisible. Cell background colours default to
-transparent. The generic `> end: name` command is reserved for closing named
-environments; currently `table` is the environment that uses it.
+transparent. The generic `> end: name` command closes named environments
+(`table`, `grid`, `row`, `stack`, `pin`, `info`, `warn`, `good`, `eq`, `frag`).
 
 <img class="rv-snapshot" src="_static/snapshots/table.svg" alt="Snapshot of a rendered table shortcut">
 
@@ -235,6 +235,156 @@ Use `[ ... ]` on a single line to produce a highlighted block.
 ```
 
 <img class="rv-snapshot" src="_static/snapshots/highlight.svg" alt="Snapshot of a rendered highlighted block">
+
+## Images and videos
+
+`! path` inserts an image and `!! path` a video, each on a single line, with
+optional flags, a fixed size and a caption. Media paths are relative to the
+presentation folder.
+
+```html
+! Media/figure.png | A captioned figure
+! Media/logo.png h=80px
+!! Media/movie.mp4 loop | A movie that loops
+```
+
+| Flag | Effect |
+| --- | --- |
+| `fill` | Fill a sized parent (a grid card or a layout region), cropping as needed. |
+| `contain` / `cover` | `object-fit` behaviour: fit without cropping / crop to fill. The default is `contain`, or `cover` when `fill` is set. |
+| `top` | Anchor the media to the top of its box (`object-position`). |
+| `h=...` / `w=...` | Fixed height / width (`px`, `em`, `%`, `vh`, `vw`), e.g. a logo strip. |
+| `+` / `+N` | Reveal the media as a fragment (optionally with an explicit index). |
+| `loop`, `autoplay`, `controls` | Video playback options. Videos are always muted, play inline, autoplay when their slide or fragment is shown and reset when it is hidden. |
+
+A trailing `| caption` adds a caption, styled as a figure caption (or as a card
+label when the media sits inside a card).
+
+## Filling the canvas: rows and columns
+
+By default a slide lays its content out as [paragraphs](#paragraphs). For
+figure-heavy slides that need exact geometry, `> fill` switches the slide body
+to a full-height flex column, and `> row` / `> col` build a layout grid whose
+heights resolve against the canvas:
+
+```html
+=== A figure-heavy slide
+> fill
+> row
+> col 2/5 center
+! Media/setup.png fill contain
+> col 3/5
+!! Media/experiment.mp4 | The experiment
+> end: row
+```
+
+- `> fill [between|center|around|end]` — the optional keyword sets the vertical
+  distribution of the slide body.
+- `> row [+[N]] [gap] [h=NNN]` opens a row of columns; `h=` pins the row height
+  (useful to keep content aligned across consecutive slides).
+- `> col [size] [center] [relative] [clip] [+[N]]` starts the next column.
+  Sizes accept fractions (`2/5`), percentages, lengths (`300px`) or bare flex
+  weights; without sizes, columns share the width equally. `center` centers the
+  column content vertically; `relative` + `clip` let the column host an
+  absolutely-positioned overlay.
+- Rows nest: a `> row` inside a column splits it further.
+- `> end: row` closes the row.
+
+Inside a `> table(...)` block, `> row` keeps its table meaning (a new table
+row); everywhere else it opens a layout row.
+
+## Grids and cards
+
+`> grid(rows, columns)` builds a grid of cards — like a table, but with card
+styling and optional per-card fragment reveal:
+
+```html
+> grid(2,2) compact
+> gap: 18px
+
+> card
+A bordered card
+
+> card plain
+! Media/logo.png h=80px
+
+> card accent +
+This card has an extra CSS class and reveals as a fragment
+
+> card +: #EFF4FF
+A fragment card with a background colour
+
+> end: grid
+```
+
+Without `compact` the grid fills the slide; with it, the grid sizes to its
+content and can sit next to other blocks. `plain` renders a chrome-less cell.
+Any other token on `> card` is added as a CSS class, so themes can offer card
+variants.
+
+## Stacks and pins
+
+`> stack` overlays several media layers in one cell, cross-fading as fragments
+— convenient to build up a figure step by step:
+
+```html
+> stack h=400px
+> layer
+! Media/base.png fill
+> layer +
+! Media/with-annotations.png fill
+> layer + clear
+! Media/grid-overlay.svg fill contain
+> end: stack
+```
+
+A fragment layer is opaque by default, hiding the layer beneath; `clear` keeps
+it transparent (a see-through overlay). `h=` pins the stack height, otherwise
+it fills its flex parent.
+
+`> pin: x% y% [w%] [+]` places an absolute overlay with its center at the given
+percentages of the slide body — annotations, arrows, badges:
+
+```html
+> pin: 75% 20% 15% +
+An annotation revealed as a fragment
+> end: pin
+```
+
+## Callout boxes and framed equations
+
+`> info`, `> warn` and `> good` produce coloured callout boxes with an optional
+bold title; `> eq` frames an equation with the theme accent:
+
+```html
+> info Dataset
+African elephant, Kruger National Park
+> end: info
+
+> eq +
+E = mc^2
+> end: eq
+```
+
+The `> eq` body is wrapped in `$$ ... $$` automatically when it contains no `$`.
+A bare `$$ ... $$` line produces a plain centered equation without the frame.
+Callout and equation boxes accept the `+` / `+N` fragment flag; a title after
+the flag becomes the box title.
+
+## Fragments
+
+Most block shortcuts accept a trailing `+` (reveal as a fragment) or `+N`
+(fragment with an explicit `data-fragment-index`, for simultaneous or
+out-of-order reveals): `! image.png +2`, `> col 2/5 +`, `> row +`,
+`> info + Title`, `> eq +3`, `> card +`, `> layer +`, `> pin: 50% 50% +`.
+
+To wrap arbitrary content in a fragment, use `> frag [N]`:
+
+```html
+> frag 1
+This whole block appears as one fragment, math included: $x^2$.
+> end: frag
+```
 
 ## Citations
 
