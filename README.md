@@ -32,8 +32,8 @@ revealer new MyTalk             # scaffold a folder + reveal.js + MyTalk.pres
 revealer build MyTalk           # generate the HTML
 ```
 
-Other commands: `revealer select`, `revealer list`, `revealer plugins`,
-`revealer update [--force]`. See the
+Other commands: `revealer open`, `revealer pdf`, `revealer select`,
+`revealer list`, `revealer plugins`, `revealer update [--force]`. See the
 [CLI documentation](https://candelierlab.github.io/Revealer/cli.html).
 
 ## VS Code workflow

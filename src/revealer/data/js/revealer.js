@@ -319,17 +319,48 @@ function revealerApplyFragment(fragment, restore) {
   });
 }
 
+/* --- Video playback tied to slides / fragments --------------------------- */
+
+function rv_videosIn(el) {
+  if (!el) return [];
+  var vids = [];
+  if (el.tagName === 'VIDEO') vids.push(el);
+  if (el.querySelectorAll) el.querySelectorAll('video').forEach(function (v) { vids.push(v); });
+  return vids;
+}
+
+function rv_playVideos(el) {
+  rv_videosIn(el).forEach(function (v) {
+    try { v.currentTime = 0; var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+  });
+}
+
+function rv_resetVideos(el) {
+  rv_videosIn(el).forEach(function (v) {
+    try { v.pause(); v.currentTime = 0; } catch (e) {}
+  });
+}
+
 Reveal.on('slidechanged', function (event) {
   set_fixed(event.currentSlide);
   fitSlide(event.currentSlide);
+  if (event.previousSlide) rv_resetVideos(event.previousSlide);
+  // Autoplay videos that are visible immediately (not gated behind a fragment).
+  rv_videosIn(event.currentSlide).forEach(function (v) {
+    if (!(v.closest && v.closest('.fragment'))) {
+      try { v.currentTime = 0; var p = v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+  });
 });
 
 Reveal.on('fragmentshown', function (event) {
   revealerApplyFragment(event.fragment, false);
+  rv_playVideos(event.fragment);
 });
 
 Reveal.on('fragmenthidden', function (event) {
   revealerApplyFragment(event.fragment, true);
+  rv_resetVideos(event.fragment);
 });
 
 Reveal.on('ready', function (event) {

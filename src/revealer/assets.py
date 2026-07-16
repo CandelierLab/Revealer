@@ -257,6 +257,18 @@ def inject_revealer_assets(reveal_dir: str) -> None:
     for f in (DATA / "fonts").glob("*"):
         shutil.copyfile(f, fonts_dest / f.name)
 
+    # Bundle KaTeX locally so math renders fully offline. The reveal.js math
+    # plugin otherwise fetches KaTeX from a CDN at runtime, so a flaky network
+    # or an offline venue (a conference projector!) leaves every equation as
+    # raw "$$…$$" source. build.py points the plugin at this copy via
+    # `katex: { local: 'reveal.js/katex' }`.
+    katex_src = DATA / "katex"
+    if katex_src.is_dir():
+        katex_dest = reveal / "katex"
+        if katex_dest.exists():
+            shutil.rmtree(katex_dest)
+        shutil.copytree(katex_src, katex_dest)
+
 
 # --- reveal.js + plugin download --------------------------------------------
 

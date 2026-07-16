@@ -18,10 +18,10 @@
     <body><header></header><footer></footer>
         <div class="reveal">
             <div class="slides">
-<section data-transition="none" data-state="slide_0" data-rv-header-margin="0.05" data-rv-column-spacing="0.05" data-rv-column-width="equal"><style>.slide_0 header { display: none; }</style><div class="rv-content"><div class="rv-content-inner"><div class="multi-column"><div class="column" style="--rv-para-spacing:1.75"><div class="rv-paragraph"><h1>Simple Revealer demo</h1><h2>A tiny `.pres` file</h2><br>First author<div id="event">Anywhere, 01/01/4321</div></div></div></div></div></div>
-</section><section data-transition="none"><section data-transition="none" data-state="slide_1" data-rv-header-margin="0.05" data-rv-column-spacing="0.05" data-rv-column-width="equal"><div class="slide_header">First slide</div><div class="rv-content"><div class="rv-content-inner"><div class="multi-column"><div class="column" style="--rv-para-spacing:1.750"><div class="rv-paragraph">A slide can be just a title and a few lines of HTML. <br>
+<section data-transition="none" data-state="slide_0" data-rv-header-margin="0.05" data-rv-column-spacing="0.05" data-rv-column-width="equal"><style>.slide_0 header { display: none; }</style><div class="rv-content"><div class="rv-content-inner"><div class="multi-column"><div class="column" style="--rv-para-spacing:0.5"><div class="rv-paragraph"><h1>Simple Revealer demo</h1><h2>A tiny `.pres` file</h2><br><div id="author">First author</div><div id="event">Anywhere, 01/01/4321</div></div></div></div></div></div>
+</section><section data-transition="none"><section data-transition="none" data-state="slide_1" data-rv-header-margin="0.05" data-rv-column-spacing="0.05" data-rv-column-width="equal"><div class="slide_header">First slide</div><div class="rv-content"><div class="rv-content-inner"><div class="multi-column"><div class="column" style="--rv-para-spacing:0.500"><div class="rv-paragraph">A slide can be just a title and a few lines of HTML. <br>
 </div><div class="rv-paragraph"><style> .rv-list { margin: 0 0 0 1em; padding-left: 1em; }.rv-list.lvl-1 li { list-style-type: disc; font-size: 1.00em; margin: 0.2em 0; }.rv-list.lvl-2 li { list-style-type: circle; font-size: 0.94em; margin: 0.2em 0; }.rv-list.lvl-3 li { list-style-type: square; font-size: 0.88em; margin: 0.2em 0; }.rv-list.lvl-4 li { list-style-type: decimal; font-size: 0.82em; margin: 0.2em 0; }.rv-list.lvl-5 li { list-style-type: lower-alpha; font-size: 0.76em; margin: 0.2em 0; }.rv-list.lvl-6 li { list-style-type: lower-roman; font-size: 0.70em; margin: 0.2em 0; }.rv-list.lvl-7 li { list-style-type: disc; font-size: 0.70em; margin: 0.2em 0; }.rv-list.lvl-8 li { list-style-type: circle; font-size: 0.70em; margin: 0.2em 0; }.rv-list.lvl-9 li { list-style-type: square; font-size: 0.70em; margin: 0.2em 0; }.rv-list.lvl-10 li { list-style-type: decimal; font-size: 0.70em; margin: 0.2em 0; }</style><ul class="rv-list lvl-1"><li>Write text</li><li>Add bullets</li><li>Save and build</li></ul></div></div></div></div></div>
-</section><section data-transition="none" data-state="slide_2" data-rv-header-margin="0.05" data-rv-column-spacing="0.05" data-rv-column-width="equal"><div class="slide_header">A vertical sub-slide</div><div class="rv-content"><div class="rv-content-inner"><div class="multi-column"><div class="column" style="--rv-para-spacing:1.750"><div class="rv-paragraph">Use <code>---</code> to create a slide below the previous one. <br>
+</section><section data-transition="none" data-state="slide_2" data-rv-header-margin="0.05" data-rv-column-spacing="0.05" data-rv-column-width="equal"><div class="slide_header">A vertical sub-slide</div><div class="rv-content"><div class="rv-content-inner"><div class="multi-column"><div class="column" style="--rv-para-spacing:0.500"><div class="rv-paragraph">Use <code>---</code> to create a slide below the previous one. <br>
 Navigate with the up and down arrows.
 </div></div></div></div></div>
 </section></section>            </div>
@@ -43,6 +43,8 @@ Navigate with the up and down arrows.
                 slideNumber: 'c/t',
                 center: false,
                 plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom, RevealMath.KaTeX, RevealSearch, RevealChalkboard, RevealCustomControls ],
+        katex: { local: 'reveal.js/katex' },
+        
             });
         </script>
     <script src="reveal.js/js/jquery.min.js"></script>

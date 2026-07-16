@@ -41,6 +41,26 @@ def get_root() -> Path | None:
     return Path(root) if root else None
 
 
+def get_recents() -> list[Path]:
+    """Recently loaded presentation folders (most recent first; existing only)."""
+    out = []
+    for entry in load().get("recents", []):
+        path = Path(entry)
+        if path.exists() and path not in out:
+            out.append(path)
+    return out
+
+
+def add_recent(path: str | Path, limit: int = 12) -> Path:
+    """Remember *path* (a presentation folder) at the top of the recents list."""
+    resolved = Path(path).expanduser().resolve()
+    data = load()
+    recents = [str(resolved)] + [r for r in data.get("recents", []) if r != str(resolved)]
+    data["recents"] = recents[:limit]
+    save(data)
+    return resolved
+
+
 def set_root(path: str | Path) -> Path:
     root = Path(path).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)

@@ -7,6 +7,7 @@ as an explicit sub-command (``revealer build``, ``revealer new``, ...).
 
 from __future__ import annotations
 
+import webbrowser
 from pathlib import Path
 
 import questionary
@@ -42,6 +43,19 @@ def _list_presentations(root: Path) -> list[Path]:
     return out
 
 
+def _all_presentations() -> list[Path]:
+    """Root presentations plus recently-loaded ones (deduplicated, in order)."""
+
+    out: list[Path] = []
+    root = config.get_root()
+    if root and root.exists():
+        out.extend(_list_presentations(root))
+    for pdir in config.get_recents():
+        if pdir.is_dir() and _find_pres(pdir) and pdir not in out:
+            out.append(pdir)
+    return out
+
+
 def _require_root() -> Path:
     root = config.get_root()
     if root is None or not root.exists():
@@ -53,26 +67,59 @@ def _require_root() -> Path:
     return root
 
 
+def _browse_for_pres() -> Path | None:
+    """Ask for a path to a ``.pres`` file (or its folder); register and return its dir."""
+
+    answer = questionary.path("Path to a .pres file (or its folder):").ask()
+    if not answer:
+        return None
+    p = Path(answer).expanduser().resolve()
+    pdir = p.parent if p.suffix == ".pres" else p
+    if not pdir.is_dir() or _find_pres(pdir) is None:
+        console.print("[red]No .pres file found at {0}.[/red]".format(pdir))
+        return None
+    config.add_recent(pdir)
+    return pdir
+
+
 def _resolve_pres_dir(target: str | None) -> Path:
-    """Resolve *target* (a .pres file, a directory, or None) to a directory."""
+    """Resolve *target* (a .pres file, a directory, or None) to a directory.
+
+    With no target, show a picker of known presentations plus a *Load…* entry
+    that browses to any ``.pres`` on disk.
+    """
 
     if target:
         p = Path(target).expanduser().resolve()
         return p.parent if p.suffix == ".pres" else p
 
-    root = _require_root()
-    presentations = _list_presentations(root)
-    if not presentations:
-        console.print("[yellow]No presentations found in {0}.[/yellow]".format(root))
-        raise typer.Exit(1)
+    presentations = _all_presentations()
+    load_value = "\x00load"
+    choices = [
+        questionary.Choice(
+            title=p.name if (config.get_root() and p.parent == config.get_root()) else "{0}  ({1})".format(p.name, p.parent),
+            value=str(p),
+        )
+        for p in presentations
+    ]
+    choices.append(questionary.Choice(title="📂 Load a presentation (browse to a .pres)…", value=load_value))
 
-    choice = questionary.select(
-        "Select a presentation:",
-        choices=[p.name for p in presentations],
-    ).ask()
+    choice = questionary.select("Select a presentation:", choices=choices).ask()
     if choice is None:
         raise typer.Exit(1)
-    return root / choice
+    if choice == load_value:
+        pdir = _browse_for_pres()
+        if pdir is None:
+            raise typer.Exit(1)
+        return pdir
+    return Path(choice)
+
+
+def _open_in_browser(html: Path) -> None:
+    try:
+        webbrowser.open(html.resolve().as_uri())
+    except Exception:  # pragma: no cover - environment dependent
+        console.print("[yellow]Could not open a browser; open {0} manually.[/yellow]".format(html))
 
 
 def _choose_extensions(default: list[str]) -> list[str]:
@@ -128,6 +175,22 @@ def _action_build(pres: Path) -> None:
     console.print("[green]Built[/green] {0}".format(out))
 
 
+def _action_open(target: str | None, show: bool = True) -> None:
+    """Load a presentation: build it, remember it, and open it in the browser."""
+
+    pdir = _resolve_pres_dir(target)
+    pres = _find_pres(pdir)
+    if pres is None:
+        console.print("[red]No .pres file found in {0}.[/red]".format(pdir))
+        raise typer.Exit(1)
+    config.add_recent(pdir)
+    out = Path(build_presentation(str(pres)))
+    console.print("[green]Loaded[/green] {0}".format(pres))
+    if show:
+        _open_in_browser(out)
+        console.print("Opened [bold]{0}[/bold] in your browser.".format(out))
+
+
 def _action_plugins(target: str | None) -> None:
     pdir = _resolve_pres_dir(target)
     current = assets.read_presentation_extensions(str(pdir))
@@ -148,13 +211,22 @@ def _action_update(target: str | None, force: bool) -> None:
 
 
 def _action_list() -> None:
-    root = _require_root()
-    table = Table(title="Presentations in {0}".format(root))
+    presentations = _all_presentations()
+    if not presentations:
+        console.print(
+            "[yellow]No presentations yet.[/yellow] Use [bold]Load a presentation[/bold] to open one, "
+            "or set a root with [bold]revealer root <path>[/bold]."
+        )
+        return
+    root = config.get_root()
+    table = Table(title="Presentations")
     table.add_column("Name", style="bold")
     table.add_column("Extensions")
-    for pdir in _list_presentations(root):
+    table.add_column("Location")
+    for pdir in presentations:
         exts = ", ".join(assets.read_presentation_extensions(str(pdir)))
-        table.add_row(pdir.name, exts)
+        loc = "root" if (root and pdir.parent == root) else str(pdir.parent)
+        table.add_row(pdir.name, exts, loc)
     console.print(table)
 
 
@@ -167,6 +239,13 @@ def _menu_build() -> None:
         console.print("[red]No .pres file found.[/red]")
         return
     _action_build(pres)
+
+
+def _menu_open() -> None:
+    pdir = _browse_for_pres()
+    if pdir is None:
+        return
+    _action_open(str(pdir))
 
 
 def _menu_new() -> None:
@@ -196,6 +275,7 @@ def interactive_menu() -> None:
     """Navigable menu shown when ``revealer`` is run with no sub-command."""
 
     actions = {
+        "open": ("Load a presentation (open a .pres in the browser)", _menu_open),
         "build": ("Build a presentation", _menu_build),
         "new": ("Create a new presentation", _menu_new),
         "plugins": ("Manage extensions", lambda: _action_plugins(None)),
@@ -263,6 +343,16 @@ def select():
     _action_build(pres)
 
 
+@app.command(name="open")
+def open_pres(
+    target: str = typer.Argument(None, help="A .pres file or its folder (omit to pick from the list / browse)."),
+    no_show: bool = typer.Option(False, "--no-show", help="Build and remember only; don't open a browser."),
+):
+    """Load a presentation: build it, remember it, and open it in the browser."""
+
+    _action_open(target, show=not no_show)
+
+
 @app.command()
 def plugins(target: str = typer.Argument(None, help="Presentation folder or .pres file.")):
     """Choose the extensions for a presentation and update reveal.js."""
@@ -293,6 +383,32 @@ def build(target: str = typer.Argument(None, help="Presentation folder or .pres 
             console.print("[red]No .pres file found.[/red]")
             raise typer.Exit(1)
     _action_build(pres)
+
+
+@app.command()
+def pdf(
+    target: str = typer.Argument(None, help="Presentation folder or .pres/.html file."),
+    out: str = typer.Option(None, "--out", "-o", help="Output PDF path."),
+):
+    """Export a presentation to PDF (one fully-revealed page per slide)."""
+
+    from . import pdf as pdf_module
+
+    if target and Path(target).suffix in (".pres", ".html"):
+        src = Path(target).expanduser().resolve()
+    else:
+        pdir = _resolve_pres_dir(target)
+        pres = _find_pres(pdir)
+        if pres is None:
+            console.print("[red]No .pres file found.[/red]")
+            raise typer.Exit(1)
+        src = pres
+    try:
+        out_path = pdf_module.export_pdf(str(src), out, log=console.print)
+    except RuntimeError as exc:
+        console.print("[red]{0}[/red]".format(exc))
+        raise typer.Exit(1)
+    console.print("[green]Exported[/green] {0}".format(out_path))
 
 
 @app.command(name="list")

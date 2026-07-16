@@ -1,12 +1,13 @@
 reveal.js/
 Demo/Demo.html
 
-# Python
+# Python (repo-root build artifacts only — anchored so nested data dirs like
+# src/revealer/data/katex/dist/ are still tracked)
 __pycache__/
 *.py[cod]
 *.egg-info/
-dist/
-build/
+/dist/
+/build/
 .venv/
 
 # Sphinx documentation build

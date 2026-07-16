@@ -17,7 +17,8 @@ revealer
 Revealer — reveal.js scientific presentations
 
 ? What would you like to do?
- » Build a presentation
+ » Load a presentation (open a .pres in the browser)
+   Build a presentation
    Create a new presentation
    Manage extensions
    Update the reveal.js engine
@@ -31,6 +32,12 @@ corresponding action (asking for any extra input, such as a presentation to
 pick or extensions to toggle) and then returns to the menu. Choose *Quit* (or
 press `Ctrl-C`) to leave.
 
+*Load a presentation* lets you browse to any `.pres` file (or its folder), even
+one that does **not** live under the root — it builds the deck, opens it in your
+browser, and remembers it (see *recents* below). The presentation picker used by
+the other actions also offers a *📂 Load a presentation…* entry, so you can
+always reach a deck outside the root.
+
 Every menu entry has an equivalent sub-command, documented below, for scripted
 or non-interactive use.
 
@@ -40,6 +47,12 @@ Revealer stores a small global configuration in
 `~/.config/revealer/config.toml` (following the XDG base directory spec). Its
 main role is to remember your **presentations root** — the folder where all your
 presentations live.
+
+It also keeps a short **recents** list: every presentation you *load* (via the
+menu or `revealer open`) is remembered there, so it shows up in `revealer list`
+and in the presentation picker even if it lives outside the root. (Discovery
+under the root only scans its direct child folders, so decks nested deeper are
+reached via *Load* / recents.)
 
 Each presentation also carries a hidden `.revealer.toml` file recording the
 reveal.js extensions it uses, so the engine can be rebuilt or updated
@@ -65,6 +78,19 @@ file. You are prompted to select the extensions interactively.
 ```bash
 revealer new MyTalk
 revealer new MyTalk --here   # create in the current directory instead
+```
+
+### `revealer open [TARGET]`
+
+Load a presentation: build it, remember it in *recents*, and open the result in
+your browser. `TARGET` may be a `.pres` file or its folder; omit it to pick from
+the list (which includes a *Load…* browse entry).
+
+```bash
+revealer open ~/talks/MyTalk/MyTalk.pres   # build + open in the browser
+revealer open ~/talks/MyTalk               # a folder works too
+revealer open --no-show MyTalk.pres        # build + remember only, no browser
+revealer open                              # pick / browse interactively
 ```
 
 ### `revealer select`
@@ -99,6 +125,22 @@ the current reveal.js version and plugin set.
 
 Generate the HTML presentation from a `.pres` file. This is the command used by
 the VS Code *Run on save* integration.
+
+### `revealer pdf [TARGET]`
+
+Export a presentation to PDF, one page per slide with every fragment visible.
+`TARGET` may be a `.pres` file or its folder; `--out` / `-o` sets the output
+path (default: next to the `.pres`).
+
+```bash
+revealer pdf MyTalk               # -> MyTalk/MyTalk.pdf
+revealer pdf MyTalk -o slides.pdf
+```
+
+The export drives a headless Chrome/Chromium (it must be installed, along with
+the `img2pdf` command); each slide is captured at the presentation resolution
+and the pages are assembled losslessly. This avoids the blank pages produced by
+the stock reveal.js `?print-pdf` route with Revealer's fitted layout.
 
 ## How updating works
 

@@ -740,3 +740,100 @@ h1.relief {
   background: var(--rv-dark-fixed-bg);
   color: var(--rv-dark-color);
 }
+
+/* --- Layout & component macros ------------------------------------------
+   Backing styles for the .pres layout DSL: media shortcuts (`!` / `!!`),
+   `> fill`, `> row` / `> col`, `> grid` / `> card`, `> stack` / `> layer`,
+   `> pin`, callout boxes (`> info` / `> warn` / `> good`) and framed
+   equations (`> eq`). Neutral by default; themes override the variables. */
+
+:root {
+  --rv-accent: #2a76dd;            /* callout / framed-eq accent */
+  --rv-accent-bg: #eef3fb;         /* pale accent background */
+  --rv-warn: #c75038;
+  --rv-warn-bg: #fff5f1;
+  --rv-good: #1a8a1a;
+  --rv-good-bg: #f3fbf3;
+  --rv-muted-color: #666;
+  --rv-media-radius: 6px;
+  --rv-card-bg: #f7f8fa;
+  --rv-card-border: #e0e2e8;
+  --rv-gap-row: 0.8em;
+  --rv-gap-col: 1.2em;
+}
+
+/* Layout primitives (used by `> row` / `> col`, also handy from raw HTML) */
+.row, .col { display: flex; gap: var(--rv-gap-col); min-width: 0; min-height: 0; }
+.row { flex-direction: row;    align-items: stretch; }
+.col { flex-direction: column; gap: var(--rv-gap-row); }
+.row > *, .col > * { min-width: 0; min-height: 0; }
+.region { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+/* `> fill`: the slide body becomes a full-height flex column, so rows and
+   regions can resolve their heights against the canvas. */
+.reveal section.rv-fill .rv-content-inner {
+  height: 100%; display: flex; flex-direction: column;
+  gap: var(--rv-gap-row); min-height: 0;
+}
+.reveal section.rv-fill-between .rv-content-inner { justify-content: space-between; }
+.reveal section.rv-fill-around  .rv-content-inner { justify-content: space-around; }
+.reveal section.rv-fill-center  .rv-content-inner { justify-content: center; }
+.reveal section.rv-fill-end     .rv-content-inner { justify-content: flex-end; }
+
+/* `!` image / `!!` video shortcuts */
+.rv-fig { display: flex; flex-direction: column; align-items: center; gap: 0.25em;
+  min-width: 0; min-height: 0; margin: 0; max-width: 100%; }
+.reveal .rv-media { display: block; max-width: 100%; height: auto; margin: 0 auto;
+  border-radius: var(--rv-media-radius); }
+.reveal .rv-media-fill { width: 100%; flex: 1 1 0; min-height: 0; height: 0;
+  object-position: center; border-radius: var(--rv-media-radius);
+  display: block; margin: 0; max-width: 100%; max-height: 100%; }
+.rv-cap { font-size: 0.65em; color: var(--rv-muted-color); font-style: italic;
+  text-align: center; margin-top: 0.15em; }
+
+/* `> grid` / `> card` */
+.rv-grid-wrap { width: 100%; height: 100%; flex: 1 1 auto; box-sizing: border-box; min-height: 0; }
+.rv-grid { display: grid; width: 100%; height: 100%; box-sizing: border-box; }
+.rv-grid-wrap.compact { flex: 0 0 auto; height: auto; }
+.rv-grid-wrap.compact > .rv-grid { height: auto; }
+.rv-card { background: var(--rv-card-bg); border: 1.5px solid var(--rv-card-border);
+  border-radius: var(--rv-media-radius); display: flex; flex-direction: column;
+  align-items: center; gap: 0.35em; padding: 0.5em 0.4em;
+  min-height: 0; min-width: 0; overflow: hidden; }
+.rv-cell { display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.3em; min-width: 0; min-height: 0; overflow: hidden; }
+
+/* `> stack` / `> layer`: overlaid media layers cross-fading as fragments */
+.rv-stack { position: relative; display: grid; width: 100%; flex: 1 1 0;
+  min-width: 0; min-height: 0; }
+.rv-stack > .rv-layer { grid-area: 1 / 1; min-width: 0; min-height: 0; display: flex;
+  align-items: center; justify-content: center; overflow: hidden;
+  border-radius: var(--rv-media-radius); }
+.rv-stack > .rv-layer.rv-opaque { background: var(--r-background-color, #fff); }
+.reveal .rv-stack > .rv-layer > img,
+.reveal .rv-stack > .rv-layer > svg { width: 100%; height: 100%; object-fit: contain;
+  display: block; margin: 0; }
+.rv-stack > .rv-layer > .rv-fig,
+.rv-stack > .rv-layer > .rv-media-fill { flex: 1 1 auto; width: 100%; min-height: 0; }
+
+/* `> pin`: absolute overlay positioned in % of the slide body */
+.rv-pin { position: absolute; transform: translate(-50%, -50%); z-index: 5; }
+
+/* Callout boxes (`> info` / `> warn` / `> good`) and framed equations (`> eq`) */
+.box-info { background: var(--rv-accent-bg); border-left: 5px solid var(--rv-accent);
+  border-radius: 0 8px 8px 0; padding: 0.4em 0.65em; }
+.box-warn { background: var(--rv-warn-bg); border-left: 5px solid var(--rv-warn);
+  border-radius: 0 8px 8px 0; padding: 0.4em 0.65em; }
+.box-good { background: var(--rv-good-bg); border-left: 5px solid var(--rv-good);
+  border-radius: 0 8px 8px 0; padding: 0.4em 0.65em; }
+.box-title { font-size: 0.7em; font-weight: 700; line-height: 1.2; margin-bottom: 0.2em;
+  color: var(--rv-accent); }
+.box-warn .box-title { color: var(--rv-warn); }
+.box-good .box-title { color: var(--rv-good); }
+.math-box { background: var(--rv-accent-bg); border-left: 5px solid var(--rv-accent);
+  border-radius: 0 6px 6px 0; padding: 0.45em 0.7em; }
+.math-body { line-height: 1.4; }
+
+/* Title slide: affiliation line (between authors and event) */
+#affiliation { color: var(--rv-muted-color); font-size: 0.7em; line-height: 1.4;
+  margin-top: 0.5em; }
